@@ -1,9 +1,6 @@
 package UserAgent::Any::Response::Impl::MojoMessageResponse;
 
-use strict;
-use warnings;
 use v5.36;
-use utf8;
 
 use Moo;
 
@@ -47,8 +44,9 @@ __END__
 
 =head1 NAME
 
-UserAgent::Any::Response::Impl::HttpResponse
+UserAgent::Any::Response::Impl::MojoMessageResponse
 
 =head1 SYNOPSIS
 
-Implementation of L<UserAgent::Any::Response> for the L<HTTP::Response> class.
+Implementation of L<UserAgent::Any::Response> for the L<Mojo::Message::Response>
+class.

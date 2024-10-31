@@ -36,5 +36,7 @@ requires 'namespace::clean';
 
 recommends 'LWP::UserAgent';
 recommends 'LWP::Protocol::https';
+recommends 'Promise::Me';
+
 suggests 'Mojo::UserAgent';
 suggests 'AnyEvent::UserAgent';

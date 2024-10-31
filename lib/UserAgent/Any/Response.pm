@@ -1,9 +1,6 @@
 package UserAgent::Any::Response;
 
-use strict;
-use warnings;
 use v5.36;
-use utf8;
 
 use Carp;
 use Moo;
@@ -34,7 +31,7 @@ __END__
 
 =head1 NAME
 
-UserAgent::Any::Response
+UserAgent::Any::Response – Response object for L<UserAgent::Any>
 
 =head1 SYNOPSIS
 
@@ -52,6 +49,13 @@ C<UserAgent::Any::Response> is a read-only object containing the response from
 a call made by L<UserAgent::Any>.
 
 =head2 Constructor
+
+  my $res = UserAgent::Any::Response->new($underlying_response);
+
+Builds a new C<UserAgent::Any::Response> object wrapping the given underlying
+response. Currently supported wrapped objects are L<HTTP::Response> and
+L<Mojo::Message::Response>. Feel free to ask for or contribute new
+implementations.
 
 =head2 Methods
 
@@ -103,8 +107,6 @@ context or all the values in list content.
   my $obj = $res->res;
 
 Returns the underlying response object being wrapped.
-
-=back
 
 =head1 AUTHOR
 

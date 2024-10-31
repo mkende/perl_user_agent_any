@@ -28,6 +28,8 @@ WriteMakefile(
       dynamic_config => 0,
       no_index => {
         directory => [ 'local', 'vendor', 't' ],
+        namespace => ['UserAgent::Any::Impl','UserAgent::Any::Response::Impl',],
+        package => ['UserAgent::Any::Impl','UserAgent::Any::Response::Impl',],
       },
       keywords => ['useragent','www','lwp','async','rpc','http',],
       resources => {

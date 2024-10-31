@@ -1,9 +1,6 @@
 package UserAgent::Any::Response::Impl::HttpResponse;
 
-use strict;
-use warnings;
 use v5.36;
-use utf8;
 
 use Moo;
 

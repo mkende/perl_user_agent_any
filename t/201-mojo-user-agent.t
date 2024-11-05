@@ -1,0 +1,23 @@
+use strict;
+use warnings;
+use utf8;
+
+use v5.36;
+
+use FindBin;
+use lib "$FindBin::Bin/lib";
+
+use Test2::V0 -target => 'UserAgent::Any';
+use TestSuite;  # From our the t/lib directory.
+
+BEGIN {
+  eval 'use Mojo::UserAgent';  ## no critic (ProhibitStringyEval, RequireCheckingReturnValueOfEval)
+  skip_all('Mojo::UserAgent is not installed') if $@;
+}
+
+my $underlying_ua = Mojo::UserAgent->new();
+my $ua = UserAgent::Any->new($underlying_ua);
+
+TestSuite::run($ua, sub { Mojo::IOLoop->start }, sub { Mojo::IOLoop->stop });
+
+done_testing;

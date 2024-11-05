@@ -52,13 +52,30 @@ agent implementation.
 C<UserAgent::Any> also supports both synchronous and asynchronous calls even if
 the underlying user agent is synchronous only.
 
+=head2 Supported user agents
+
+=head3 L<LWP::UserAgent>
+
+When using an L<LWP::UserAgent>, a C<UserAgent::Any> object only implements the
+synchronous calls (without the C<_cb> or C<_p> suffixes).
+
+=head3 L<Mojo::UserAgent>
+
+When using a L<Mojo::UserAgent>, a C<UserAgent::Any> object implements the
+asynchronous calls using the global singleton L<Mojo::IOLoop> and returns
+L<Mojo::Promise> objects for the method with the C<_p> suffix.
+
+=head3 L<AnyEvent::UserAgent>
+
+
+
 =head2 Constructor
 
   my $ua = UserAgent::Any->new($underlying_ua);
 
 Builds a new C<UserAgent::Any> object wrapping the given underlying user agent.
-Currently supported wrapped objects are L<LWP::UserAgent>,
-L<AnyEvent::UserAgent> and L<Mojo::UserAgent>. Feel free to ask for or
+The wrapped object must be an instance of a
+L<supported user agent|/Supported user agent>. Feel free to ask for or
 contribute new implementations.
 
 =head2 Methods
@@ -67,11 +84,7 @@ contribute new implementations.
 
   my $res = $ua->get($url, %params);
 
-=head3 get_cb
-
   $ua->get_cb($url, %params)->($cb);
-
-=head3 get_p
 
   my $promise = $ua->get_p($url, %params);
 
@@ -79,13 +92,15 @@ contribute new implementations.
 
   my $res = $ua->post($url, %params, $content);
 
-=head3 post_cb
-
   $ua->post_cb($url, %params, $content)->($cb);
 
-=head3 post_p
-
   my $promise = $ua->post_p($url, %params, $content);
+
+=head3 Where are the other methods?
+
+Modern REST application should only use the C<GET> and C<POST> verbs so these
+are the only one implemented currently. If you need them, feel free to ask for
+or contribute the implementation of other methods.
 
 =head1 AUTHOR
 

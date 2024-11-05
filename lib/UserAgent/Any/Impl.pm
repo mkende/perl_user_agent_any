@@ -17,8 +17,7 @@ requires qw(get get_cb get_p post post_cb post_p);
 sub _get_post_args {
   my ($this, $url) = (shift, shift);
   my $content = pop if @_ % 2;
-  my %params = @_;
-  return ($this, $url, \$content, \%params);
+  return ($this, $url, \$content, \@_);
 }
 
 sub _new_response {

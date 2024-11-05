@@ -6,6 +6,7 @@ use utf8;
 
 use v5.36;
 
+use Data::Dumper;
 use Test::HTTP::MockServer;
 use Test2::V0;
 
@@ -16,7 +17,10 @@ $mock->start_mock_server(sub ($req, $res) {  # req and res are HTTP::Request and
     $res->content('hello');
   } elsif ($req->uri->path eq '/echo' && $req->method eq 'POST') {
     $res->content($req->content);
+  } elsif ($req->uri->path eq '/multi-header' and $req->header('X-multi') eq 'Foo, Bar') {
+    # return OK
   } else {
+    print STDERR Dumper($req);
     die "unexpected call";
   }
 });
@@ -34,6 +38,16 @@ my @tests = (
   [ sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/echo", 'the content') },
     sub ($r, $name) {
       is($r->decoded_content, 'the content', "${name} - post echo decoded content");
+    }
+  ],
+  [ sub ($ua, $mode) { $ua->${\$get{$mode}}($mock->url_base()."/multi-header", 'X-multi' => 'Foo', 'X-multi' => 'Bar') },
+    sub ($r, $name) {
+      is($r->status_code, 200, "${name} - get multi header");
+    }
+  ],
+  [ sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/multi-header", 'X-multi' => 'Foo', 'X-multi' => 'Bar') },
+    sub ($r, $name) {
+      is($r->status_code, 200, "${name} - post multi header");
     }
   ],
 );

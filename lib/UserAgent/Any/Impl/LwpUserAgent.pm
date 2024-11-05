@@ -10,7 +10,7 @@ extends 'UserAgent::Any';
 with 'UserAgent::Any::Impl';
 
 sub get ($this, $url, %params) {
-  return UserAgent::Any::Response->new($this->{ua}->get($url, %params));
+  return $this->_new_response($this->{ua}->get($url, %params));
 }
 
 sub get_cb ($this, $url, %params) {
@@ -22,8 +22,8 @@ sub get_p ($this, $url, %params) {
 }
 
 sub post {
-  my ($this, $content, $params) = &UserAgent::Any::_get_post_args;
-  return UserAgent::Any::Response->new($this->{ua}->post($url, %{$params}, (defined ${$content} ? Content => ${$content} : ())));
+  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::_get_post_args;
+  return $this->_new_response($this->{ua}->post($url, %{$params}, (defined ${$content} ? (Content => ${$content}) : ())));
 }
 
 sub post_cb ($this, $url, %params) {

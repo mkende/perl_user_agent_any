@@ -4,6 +4,8 @@ use v5.36;
 
 use Moo::Role;
 
+use namespace::clean;
+
 has res => (
   is => 'ro',
   required => 1,

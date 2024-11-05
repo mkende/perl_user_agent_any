@@ -5,7 +5,10 @@ use utf8;
 use Encode 'encode';
 use Test2::V0 -target => 'UserAgent::Any::Response';
 
-ok (lives { require HTTP::Response }, "Can load HTTP::Response");
+BEGIN {
+  eval 'use HTTP::Response';  ## no critic (ProhibitStringyEval, RequireCheckingReturnValueOfEval)
+  skip_all('HTTP::Response is not installed') if $@;
+}
 
 my @raw_headers = ('Content-Type' => 'text/plain; charset=utf-8', 'Foo' => 'Bar', 'Baz' => 'bin', 'Foo' => 'Bar2');
 my $utf8_content = 'Héllö!';

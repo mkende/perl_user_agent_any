@@ -5,8 +5,10 @@ use utf8;
 use Encode 'encode';
 use Test2::V0 -target => 'UserAgent::Any::Response';
 
-ok (lives { require Mojo::Message::Response }, "Can load Mojo::Message::Response");
-ok (lives { require Mojo::Headers }, "Can load Mojo::Headers");
+BEGIN {
+  eval 'use Mojo::Message::Response';  ## no critic (ProhibitStringyEval, RequireCheckingReturnValueOfEval)
+  skip_all('Mojo::Message::Response is not installed') if $@;
+}
 
 my $utf8_content = 'Héllö!';
 my $raw_content = encode('UTF-8', $utf8_content);

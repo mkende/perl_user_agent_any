@@ -12,7 +12,7 @@ sub new ($class, $ua) {
   croak "Passed User Agent object must be a blessed reference" unless blessed($ua);
   if ($ua isa LWP::UserAgent) {
     require UserAgent::Any::Impl::LwpUserAgent;
-    return UserAgent::Any::Impl::HttpResponse->new(ua => $ua);
+    return UserAgent::Any::Impl::LwpUserAgent->new(ua => $ua);
   } elsif ($ua isa AnyEvent::UserAgent) {
     require UserAgent::Any::Impl::AnyEventUserAgent;
     return UserAgent::Any::Impl::AnyEventUserAgent->new(ua => $ua);
@@ -20,7 +20,7 @@ sub new ($class, $ua) {
     require UserAgent::Any::Impl::MojoUserAgent;
     return UserAgent::Any::Impl::MojoUserAgent->new(ua => $ua);
   } else {
-    croak 'Unknown User Agent type "'.ref($res).'"';
+    croak 'Unknown User Agent type "'.ref($ua).'"';
   }
 }
 

@@ -36,7 +36,11 @@ requires 'namespace::clean';
 
 recommends 'LWP::UserAgent';
 recommends 'LWP::Protocol::https';
-recommends 'Promise::Me';
 
+suggests 'HTTP::Promise';
 suggests 'Mojo::UserAgent';
 suggests 'AnyEvent::UserAgent';
+
+on 'test' => sub {
+  requires 'Test::HTTP::MockServer';
+}

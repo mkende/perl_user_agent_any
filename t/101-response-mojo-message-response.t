@@ -23,7 +23,7 @@ my $r = CLASS()->new($raw_response);
 
 isa_ok($r, ['UserAgent::Any::Response', 'UserAgent::Any::Response::Impl::MojoMessageResponse']);
 
-is($r->res, $raw_response, 'res');
+is($r->res, exact_ref($raw_response), 'res');
 is($r->status_code, 200, 'status_code');
 is($r->status_text, 'success', 'status_text');
 is($r->content, $raw_content, 'content');

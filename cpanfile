@@ -34,12 +34,24 @@ on 'develop' => sub {
 requires 'Moo';
 requires 'namespace::clean';
 
-recommends 'LWP::UserAgent';
-recommends 'LWP::Protocol::https';
+feature 'LwpUserAgent', 'Support for LWP::UserAgent' => sub {
+  requires 'LWP::UserAgent';
+  requires 'LWP::Protocol::https';
+};
 
-suggests 'HTTP::Promise';
-suggests 'Mojo::UserAgent';
-suggests 'AnyEvent::UserAgent';
+feature 'AnyEventUserAgent', 'Support for AnyEvent::UserAgent' => sub {
+  requires 'AnyEvent::UserAgent';
+  requires 'Promise::XS';
+};
+
+feature 'HttpPromise', 'Support for HTTP::Promise' => sub {
+  requires 'HTTP::Promise';
+  requires 'Promise::Me';
+};
+
+feature 'MojoUserAgent', 'Support for Moje::UserAgent' => sub {
+  requires 'Mojo::UserAgent';
+};
 
 on 'test' => sub {
   requires 'Test::HTTP::MockServer';

@@ -34,7 +34,6 @@ sub post_p ($this, $url, %params) {
   ...
 }
 
-
 1;
 
 __END__

@@ -16,6 +16,9 @@ sub new ($class, $res) {
   } elsif ($res isa Mojo::Message::Response) {
     require UserAgent::Any::Response::Impl::MojoMessageResponse;
     return UserAgent::Any::Response::Impl::MojoMessageResponse->new(res => $res);
+  } elsif ($res isa HTTP::Promise::Response) {
+    require UserAgent::Any::Response::Impl::HttpPromiseResponse;
+    return UserAgent::Any::Response::Impl::HttpPromiseResponse->new(res => $res);
   } else {
     croak 'Unknown Response type "'.ref($res).'"';
   }
@@ -53,9 +56,9 @@ a call made by L<UserAgent::Any>.
   my $res = UserAgent::Any::Response->new($underlying_response);
 
 Builds a new C<UserAgent::Any::Response> object wrapping the given underlying
-response. Currently supported wrapped objects are L<HTTP::Response> and
-L<Mojo::Message::Response>. Feel free to ask for or contribute new
-implementations.
+response. Currently supported wrapped objects are L<HTTP::Response>,
+L<Mojo::Message::Response> and L<HTTP::Promise::Respose>. Feel free to ask for
+or contribute new implementations.
 
 =head2 Methods
 

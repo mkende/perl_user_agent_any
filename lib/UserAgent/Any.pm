@@ -19,6 +19,9 @@ sub new ($class, $ua) {
   } elsif ($ua isa Mojo::UserAgent) {
     require UserAgent::Any::Impl::MojoUserAgent;
     return UserAgent::Any::Impl::MojoUserAgent->new(ua => $ua);
+  } elsif ($ua isa HTTP::Promise) {
+    require UserAgent::Any::Impl::HttpPromise;
+    return UserAgent::Any::Impl::HttpPromise->new(ua => $ua);
   } else {
     croak 'Unknown User Agent type "'.ref($ua).'"';
   }
@@ -62,12 +65,24 @@ synchronous calls (without the C<_cb> or C<_p> suffixes).
 =head3 L<Mojo::UserAgent>
 
 When using a L<Mojo::UserAgent>, a C<UserAgent::Any> object implements the
-asynchronous calls using the global singleton L<Mojo::IOLoop> and returns
-L<Mojo::Promise> objects for the method with the C<_p> suffix.
+asynchronous calls using the global singleton L<Mojo::IOLoop> and the methods
+with the C<_p> suffix return L<Mojo::Promise> objects.
 
 =head3 L<AnyEvent::UserAgent>
 
+When using a L<AnyEvent::UserAgent>, a C<UserAgent::Any> object implements the
+asynchronous calls using L<AnyEvent> C<condvar> and the methods with the C<_p>
+suffix return L<Promise::XS> objects (that module needs to be installed).
 
+Note that you probably want to set the event loop used by the promise, which has
+global effect so is not done by this module. It can be achieved with:
+
+  Promise::XS::use_event('AnyEvent');
+
+You can read more about that in L<Promise::XS/EVENT LOOPS>.
+
+If you need different promise objecte (especially L<Future>), feel free to ask
+for or contribute new implementations.
 
 =head2 Constructor
 
@@ -88,6 +103,11 @@ contribute new implementations.
 
   my $promise = $ua->get_p($url, %params);
 
+Note that while the example aboves are using C<%params>, the parameters are
+actually treated as a list as the same key can appear multiple times to send the
+same header multiple time. But that list must be an even-sized list of
+alternating key-value pairs.
+
 =head3 post
 
   my $res = $ua->post($url, %params, $content);
@@ -101,6 +121,19 @@ contribute new implementations.
 Modern REST application should only use the C<GET> and C<POST> verbs so these
 are the only one implemented currently. If you need them, feel free to ask for
 or contribute the implementation of other methods.
+
+=head1 BUGS AND LIMITATIONS
+
+=over 4
+
+=item *
+
+L<AnyEvent::UserAgent> does not properly support sending a single header
+multiple times: all the values will be concatenated (separated by C<, >) and
+sent as a single header. This is supposed to be equivalent but might give a
+different behavior from other implementations.
+
+=back
 
 =head1 AUTHOR
 

@@ -89,46 +89,38 @@ my @tests = (
   ],
 );
 
+
 sub run ($get_ua, $start_loop = undef, $stop_loop = undef) {
   _start_server();
 
-  subtest_streamed 'sync' => sub {
-    for my $t (@tests) {
-      my ($name, $req_emiter, $res_processor) = @{$t};
-      subtest $name => sub {
-        my $r = $req_emiter->($get_ua->(), '');
-        $res_processor->($r);
-      }
-    }
-  };
-
-  if (! defined $start_loop) {
-    _stop_server();
-    return;
-  }
-
-  subtest_streamed 'callback' => sub {
-    for my $t (@tests) {
-      my ($name, $req_emiter, $res_processor) = @{$t};
-      subtest $name => sub {
-        $req_emiter->($get_ua->(), 'cb')->(sub ($r) {
-          $res_processor->($r);
+  my @runner = (
+    ['sync', '', sub ($req, $proc) { $proc->($req) } ],
+    ['callback', 'cb', sub ($req, $proc) {
+      $req->(sub ($r) {
+          $proc->($r);
           $stop_loop->();
         });
-        my $events = $start_loop->();
-      }
-    }
-  };
-
-  subtest_streamed 'promise' => sub {
-    for my $t (@tests) {
-      my ($name, $req_emiter, $res_processor) = @{$t};
-      subtest $name => sub {
-        my $p = $req_emiter->($get_ua->(), 'p')->then(sub ($r) { $res_processor->($r); $stop_loop->() });
         $start_loop->();
+    } ],
+    ['promise', 'p', sub ($req, $proc) {
+      $req->then(sub ($r) { $proc->($r); $stop_loop->() });
+        $start_loop->();
+    } ]
+  );
+
+  for my $run (@runner) {
+    my ($run_name, $suffix, $handler) = @{$run};
+    next if $run_name ne 'sync' && !defined $start_loop;
+    subtest_streamed $run_name, {no_fork => 1} => sub {
+      for my $t (@tests) {
+        my ($test_name, $req_emiter, $res_processor) = @{$t};
+        subtest $test_name, {no_fork => 1} => sub {
+          my $r = $req_emiter->($get_ua->(), $suffix);
+          $handler->($r, $res_processor);
+        }
       }
     }
-  };
+  }
 
   _stop_server();
 }

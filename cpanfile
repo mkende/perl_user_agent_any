@@ -57,5 +57,5 @@ feature 'MojoUserAgent', 'Support for Moje::UserAgent' => sub {
 };
 
 on 'test' => sub {
-  requires 'Test::HTTP::MockServer', '0.0.2';
+  requires 'Test::HTTP::MockServer'; #, '0.0.2';  # not yet released.
 }

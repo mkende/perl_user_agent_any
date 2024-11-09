@@ -34,7 +34,7 @@ BEGIN {
   Promise::Me->import();
 }
 
-$Promise::Me::SHARED_MEDIUM = 'file';
+$Promise::Me::SHARE_MEDIUM = 'file';
 
 sub get_ua {
   my $underlying_ua = HTTP::Promise->new();

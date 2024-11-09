@@ -24,6 +24,8 @@ sub new ($class, $ua) {
   } elsif ($ua isa HTTP::Promise) {
     require UserAgent::Any::Impl::HttpPromise;
     return UserAgent::Any::Impl::HttpPromise->new(ua => $ua);
+  } elsif ($ua isa UserAgent::Any) {
+    return $ua;
   } else {
     croak 'Unknown User Agent type "'.ref($ua).'"';
   }
@@ -98,6 +100,11 @@ When using a L<HTTP::Promise>, a C<UserAgent::Any> object implements the
 asynchronous calls using L<Promise::Me> which execute the calls in forked
 processes. Because of that, there are some caveats with the use of this module
 and its usage is discouraged when another one can work.
+
+=head3 C<UserAgent::Any>
+
+As a convenience, you can pass a C<UserAgent::Any> to the constructor of the
+class and the exact same object will be returned.
 
 =head2 Constructor
 

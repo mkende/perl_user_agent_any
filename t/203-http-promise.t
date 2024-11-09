@@ -14,8 +14,8 @@ BEGIN {
   # The shared memory system used by Promise::Me to exchange data with the
   # parent environment seems flaky and the tests randomly fails (often leaving
   # zombie processes behind).
-  if ($ENV{HARNESS_ACTIVE} && !$ENV{EXTENDED_TESTING}) {
-    skip_all('Flaky test. Run manually or set $ENV{EXTENDED_TESTING} to a true value to run.');
+  if ($ENV{HARNESS_ACTIVE} && !$ENV{FLAKY_TESTING}) {
+    skip_all('Flaky test. Run manually or set $ENV{FLAKY_TESTING} to a true value to run.');
   }
 }
 

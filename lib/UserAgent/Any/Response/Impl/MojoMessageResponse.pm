@@ -26,7 +26,10 @@ sub decoded_content ($this) {
 }
 
 sub headers ($this) {
-  return map { my $k = $_; map { ($k, $_) } $this->header($k) } @{$this->{res}->headers->names};
+  return map {
+    my $k = $_;
+    map { ($k, $_) } $this->header($k)
+  } @{$this->{res}->headers->names};
 }
 
 sub header ($this, $header) {

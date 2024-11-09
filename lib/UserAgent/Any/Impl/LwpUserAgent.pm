@@ -14,24 +14,25 @@ sub get ($this, $url, @params) {
 }
 
 sub get_cb ($this, $url, @params) {
-  ...
+  ...;
 }
 
 sub get_p ($this, $url, @params) {
-  ...
+  ...;
 }
 
 sub post {
   my ($this, $url, $content, $params) = &UserAgent::Any::Impl::_get_post_args;
-  return $this->_new_response($this->{ua}->post($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ())));
+  return $this->_new_response(
+    $this->{ua}->post($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ())));
 }
 
 sub post_cb ($this, $url, %params) {
-  ...
+  ...;
 }
 
 sub post_p ($this, $url, %params) {
-  ...
+  ...;
 }
 
 1;

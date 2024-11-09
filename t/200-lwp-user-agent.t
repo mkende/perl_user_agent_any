@@ -15,9 +15,11 @@ BEGIN {
   skip_all('LWP::UserAgent is not installed') if $@;
 }
 
-my $underlying_ua = LWP::UserAgent->new();
-my $ua = UserAgent::Any->new($underlying_ua);
+sub get_ua {
+  my $underlying_ua = LWP::UserAgent->new();
+  return UserAgent::Any->new($underlying_ua);
+}
 
-TestSuite::run($ua);
+TestSuite::run(\&get_ua);
 
 done_testing;

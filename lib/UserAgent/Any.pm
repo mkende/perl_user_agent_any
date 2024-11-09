@@ -52,8 +52,14 @@ C<UserAgent::Any> is to user agents what L<Log::Any> is to loggers, it allows to
 write libraries making RPC calls without having to rely on one particular user
 agent implementation.
 
-C<UserAgent::Any> also supports both synchronous and asynchronous calls even if
-the underlying user agent is synchronous only.
+C<UserAgent::Any> supports both synchronous and asynchronous calls (if supported
+by the underlying user agent).
+
+The main goal of this library is to be used for Cloud API wrappers so that they
+can be written without imposing the use of one particular user agent on their
+users. As such, only a subset of the features usually exposed by full-fledged
+user agents is available for now in C<UserAgent::Any>. Feel free to ask for or
+contribute new features if needed.
 
 =head2 Supported user agents
 
@@ -83,6 +89,13 @@ You can read more about that in L<Promise::XS/EVENT LOOPS>.
 
 If you need different promise objecte (especially L<Future>), feel free to ask
 for or contribute new implementations.
+
+=head3 L<HTTP::Promise>
+
+When using a L<HTTP::Promise>, a C<UserAgent::Any> object implements the
+asynchronous calls using L<Promise::Me> which execute the calls in forked
+processes. Because of that, there are some caveats with the use of this module
+and its usage is discouraged when another one can work.
 
 =head2 Constructor
 

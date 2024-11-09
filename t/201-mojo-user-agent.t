@@ -15,9 +15,11 @@ BEGIN {
   skip_all('Mojo::UserAgent is not installed') if $@;
 }
 
-my $underlying_ua = Mojo::UserAgent->new();
-my $ua = UserAgent::Any->new($underlying_ua);
+sub get_ua {
+  my $underlying_ua = Mojo::UserAgent->new();
+  return UserAgent::Any->new($underlying_ua);
+}
 
-TestSuite::run($ua, sub { Mojo::IOLoop->start }, sub { Mojo::IOLoop->stop });
+TestSuite::run(\&get_ua, sub { Mojo::IOLoop->start }, sub { Mojo::IOLoop->stop });
 
 done_testing;

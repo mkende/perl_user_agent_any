@@ -40,7 +40,7 @@ feature 'LwpUserAgent', 'Support for LWP::UserAgent' => sub {
 };
 
 feature 'AnyEventUserAgent', 'Support for AnyEvent::UserAgent' => sub {
-  requires 'AnyEvent::UserAgent';
+  requires 'AnyEvent::UserAgent', '0.08';
   requires 'Promise::XS';
 };
 
@@ -54,5 +54,5 @@ feature 'MojoUserAgent', 'Support for Moje::UserAgent' => sub {
 };
 
 on 'test' => sub {
-  requires 'Test::HTTP::MockServer';
+  requires 'Test::HTTP::MockServer', '0.0.2';
 }

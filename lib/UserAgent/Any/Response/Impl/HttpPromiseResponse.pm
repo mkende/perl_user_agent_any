@@ -1,6 +1,6 @@
 package UserAgent::Any::Response::Impl::HttpPromiseResponse;
 
-use v5.36;
+use 5.036;
 
 use Moo;
 
@@ -8,6 +8,8 @@ use namespace::clean;
 
 extends 'UserAgent::Any::Response';
 with 'UserAgent::Any::Response::Impl';
+
+our $VERSION = 0.01;
 
 sub status_code ($this) {
   return $this->{res}->code;

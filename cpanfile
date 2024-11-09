@@ -37,10 +37,13 @@ requires 'namespace::clean';
 feature 'LwpUserAgent', 'Support for LWP::UserAgent' => sub {
   requires 'LWP::UserAgent';
   requires 'LWP::Protocol::https';
+  requires 'HTTP::Response';
 };
 
 feature 'AnyEventUserAgent', 'Support for AnyEvent::UserAgent' => sub {
+  requires 'AnyEvent';
   requires 'AnyEvent::UserAgent', '0.08';
+  requires 'HTTP::Response';
   requires 'Promise::XS';
 };
 

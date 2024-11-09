@@ -1,6 +1,6 @@
 package UserAgent::Any::Response;
 
-use v5.36;
+use 5.036;
 
 use Carp;
 use Moo;
@@ -8,8 +8,10 @@ use Scalar::Util 'blessed';
 
 use namespace::clean;
 
+our $VERSION = 0.01;
+
 sub new ($class, $res) {
-  croak "Passed Response object must be a blessed reference" unless blessed($res);
+  croak 'Passed Response object must be a blessed reference' unless blessed($res);
   if ($res isa HTTP::Response) {
     require UserAgent::Any::Response::Impl::HttpResponse;
     return UserAgent::Any::Response::Impl::HttpResponse->new(res => $res);
@@ -57,7 +59,7 @@ a call made by L<UserAgent::Any>.
 
 Builds a new C<UserAgent::Any::Response> object wrapping the given underlying
 response. Currently supported wrapped objects are L<HTTP::Response>,
-L<Mojo::Message::Response> and L<HTTP::Promise::Respose>. Feel free to ask for
+L<Mojo::Message::Response> and L<HTTP::Promise::Response>. Feel free to ask for
 or contribute new implementations.
 
 =head2 Methods

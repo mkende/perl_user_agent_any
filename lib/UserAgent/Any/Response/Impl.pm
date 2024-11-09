@@ -1,10 +1,12 @@
 package UserAgent::Any::Response::Impl;
 
-use v5.36;
+use 5.036;
 
 use Moo::Role;
 
 use namespace::clean;
+
+our $VERSION = 0.01;
 
 has res => (
   is => 'ro',

@@ -1,6 +1,6 @@
 package UserAgent::Any;
 
-use v5.36;
+use 5.036;
 
 use Carp;
 use Moo;
@@ -8,8 +8,10 @@ use Scalar::Util 'blessed';
 
 use namespace::clean;
 
+our $VERSION = 0.01;
+
 sub new ($class, $ua) {
-  croak "Passed User Agent object must be a blessed reference" unless blessed($ua);
+  croak 'Passed User Agent object must be a blessed reference' unless blessed($ua);
   if ($ua isa LWP::UserAgent) {
     require UserAgent::Any::Impl::LwpUserAgent;
     return UserAgent::Any::Impl::LwpUserAgent->new(ua => $ua);
@@ -87,7 +89,7 @@ global effect so is not done by this module. It can be achieved with:
 
 You can read more about that in L<Promise::XS/EVENT LOOPS>.
 
-If you need different promise objecte (especially L<Future>), feel free to ask
+If you need different promise objects (especially L<Future>), feel free to ask
 for or contribute new implementations.
 
 =head3 L<HTTP::Promise>
@@ -116,7 +118,7 @@ contribute new implementations.
 
   my $promise = $ua->get_p($url, %params);
 
-Note that while the example aboves are using C<%params>, the parameters are
+Note that while the examples above are using C<%params>, the parameters are
 actually treated as a list as the same key can appear multiple times to send the
 same header multiple time. But that list must be an even-sized list of
 alternating key-value pairs.

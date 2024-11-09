@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use v5.36;
+use 5.036;
 
 use Data::Dumper;
 use Test::HTTP::MockServer;
@@ -102,7 +102,10 @@ sub run ($get_ua, $start_loop = undef, $stop_loop = undef) {
     }
   };
 
-  return unless defined $start_loop;
+  if (! defined $start_loop) {
+    _stop_server();
+    return;
+  }
 
   subtest_streamed 'callback' => sub {
     for my $t (@tests) {

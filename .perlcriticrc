@@ -60,3 +60,15 @@ minimum_regex_length_to_complain_about = 30
 [-ValuesAndExpressions::ProhibitNoisyQuotes]
 
 # End of the template. You can add custom content below this line.
+
+# This policy is confused by the new `isa` keyword.
+[-BuiltinFunctions::ProhibitUniversalIsa]
+
+# We make heavy use of the ampersand to parse arguments.
+[-Perl::Critic::Policy::Subroutines::ProhibitAmpersandSigils]
+
+[Perl::Critic::Policy::Subroutines::RequireArgUnpacking]
+allow_delegation_to = get_post_args
+
+[Perl::Critic::Policy::ControlStructures::ProhibitCascadingIfElse]
+max_elsif = 4

@@ -1,6 +1,6 @@
 package UserAgent::Any::Response::Impl::MojoMessageResponse;
 
-use v5.36;
+use 5.036;
 
 use Moo;
 
@@ -8,6 +8,8 @@ use namespace::clean;
 
 extends 'UserAgent::Any::Response';
 with 'UserAgent::Any::Response::Impl';
+
+our $VERSION = 0.01;
 
 sub status_code ($this) {
   return $this->{res}->code;
@@ -26,10 +28,11 @@ sub decoded_content ($this) {
 }
 
 sub headers ($this) {
-  return map {
-    my $k = $_;
-    map { ($k, $_) } $this->header($k)
-  } @{$this->{res}->headers->names};
+  my @all_headers;
+  for my $k (@{$this->{res}->headers->names}) {
+    push @all_headers, map { ($k, $_) } $this->header($k);
+  }
+  return @all_headers;
 }
 
 sub header ($this, $header) {

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use utf8;
 
-use v5.36;
+use 5.036;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";

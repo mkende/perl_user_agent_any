@@ -1,12 +1,14 @@
 package UserAgent::Any::Impl;
 
-use v5.36;
+use 5.036;
 
 use List::Util 'pairs';
 use Moo::Role;
 use UserAgent::Any::Response;
 
 use namespace::clean;
+
+our $VERSION = 0.01;
 
 has ua => (
   is => 'ro',
@@ -15,18 +17,19 @@ has ua => (
 
 requires qw(get get_cb get_p post post_cb post_p);
 
-sub _get_post_args {
+sub get_post_args {  ## no critic (RequireArgUnpacking)
   my ($this, $url) = (shift, shift);
-  my $content = pop if @_ % 2;
+  my $content;
+  $content = pop if @_ % 2;
   return ($this, $url, \$content, \@_);
 }
 
-sub _new_response {
+sub new_response {
   my (undef, $r) = @_;  # The undef is $this that we are not using.
   return UserAgent::Any::Response->new($r);
 }
 
-sub _params_to_hash (@params) {
+sub params_to_hash (@params) {
   my %hash;
   for my $kv (pairs @params) {
     my $v = $hash{$kv->key};

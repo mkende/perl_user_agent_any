@@ -104,7 +104,7 @@ calls
 
 =head1 DESCRIPTION
 
-C<UserAgent::Any> is to user agents what L<Log::Any> is to loggers, it allows to
+C<UserAgent::Any> is to user agents what L<Log::Any> is to loggers: it allows to
 write libraries making RPC calls without having to rely on one particular user
 agent implementation.
 
@@ -156,7 +156,7 @@ and its usage is discouraged when another one can work.
 =head3 C<UserAgent::Any>
 
 As a convenience, you can pass a C<UserAgent::Any> to the constructor of the
-class and the exact same object will be returned.
+package and the exact same object will be returned.
 
 =head2 Constructor
 
@@ -164,7 +164,7 @@ class and the exact same object will be returned.
 
 Builds a new C<UserAgent::Any> object wrapping the given underlying user agent.
 The wrapped object must be an instance of a
-L<supported user agent|/Supported user agent>. Feel free to ask for or
+L<supported user agent|/Supported user agents>. Feel free to ask for or
 contribute new implementations.
 
 Note that C<UserAgent::Any> is a L<Moo::Role> and not a class. As such you can
@@ -326,6 +326,10 @@ L<AnyEvent::UserAgent>
 =item *
 
 L<Mojo::UserAgent>
+
+=item *
+
+L<HTTP::Promise>
 
 =back
 

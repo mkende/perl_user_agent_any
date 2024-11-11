@@ -20,6 +20,8 @@ sub new ($class, $res) {
   } elsif ($res isa HTTP::Promise::Response) {
     require UserAgent::Any::Response::Impl::HttpPromiseResponse;
     return UserAgent::Any::Response::Impl::HttpPromiseResponse->new(res => $res);
+  } elsif ($res isa UserAgent::Any::Response) {
+    return $res;
   } else {
     croak 'Unknown Response type "'.ref($res).'"';
   }

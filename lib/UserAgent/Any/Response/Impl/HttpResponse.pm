@@ -20,11 +20,11 @@ sub status_text ($this) {
 }
 
 sub content ($this) {
-  return $this->{res}->content;
+  return $this->{res}->decoded_content;
 }
 
-sub decoded_content ($this) {
-  return $this->{res}->decoded_content;
+sub raw_content ($this) {
+  return $this->{res}->content;
 }
 
 sub headers ($this) {

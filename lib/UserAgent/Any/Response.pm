@@ -80,14 +80,21 @@ Returns the response status message attribute explaining the response code.
 
   my $bytes = $res->content;
 
-Returns the raw response content. This should be treated as a string of bytes.
+Returns the decoded response content according to the C<Content-Encoding>
+header. For textual content this is turned into a Perl unicode string.
+
+Note that this is often called C<decoded_content> in other response objects.
+But, as this is what you should always use, we settled here on the simpler name.
 
 =head3 decoded_content
 
   my $text = $res->decoded_content;
 
-Returns the decoded response content according to the C<Content-Encoding>
-header. For textual content this is turned into a Perl unicode string.
+Returns the raw response content. This should be treated as a string of bytes.
+
+Note that this is often called C<content> in other response objects. But in
+general you don’t want to use that field unless you are doing low-level
+manipulations.
 
 =head3 headers
 

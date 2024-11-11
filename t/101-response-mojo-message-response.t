@@ -26,8 +26,8 @@ isa_ok($r, ['UserAgent::Any::Response', 'UserAgent::Any::Response::Impl::MojoMes
 is($r->res, exact_ref($raw_response), 'res');
 is($r->status_code, 200, 'status_code');
 is($r->status_text, 'success', 'status_text');
-is($r->content, $raw_content, 'content');
-is($r->decoded_content, $utf8_content, 'decoded_content');
+is($r->raw_content, $raw_content, 'raw_content');
+is($r->content, $utf8_content, 'content');
 is($r->header('Baz'), 'bin', 'header1');
 is($r->header('Foo'), 'Bar, Bar2', 'header2scalar');
 is([$r->header('Foo')], ['Bar', 'Bar2'], 'header2list');

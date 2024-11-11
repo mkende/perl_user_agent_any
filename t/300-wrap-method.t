@@ -4,6 +4,8 @@ use AnyEvent;
 use Encode 'encode';
 use Test2::V0 -target => 'UserAgent::Any';
 
+# We first test the wrap_method directly calling a class method.
+
 package TestSubject {
   use AnyEvent::Loop;
   use AnyEvent;
@@ -89,6 +91,55 @@ is($test->countbar(1, 2, 2), [3, 3], 'count 2');
   $test->rebar_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
   $cv->recv;
   is($r, 9, 'rebar_p');
+}
+
+# Now we test the wrap_method calling a method of a member of the class.
+
+package TestDerived {
+  use Moo;
+  use UserAgent::Any 'wrap_method';
+
+  has subject => (is => 'rw');
+
+  wrap_method(hop => \&subject => 'foo', sub ($self, $l, $r) { ($l, $r) });
+  wrap_method(rehop => \&subject => 'foo', sub ($self, $l, $r) { ($l, $r) }, sub ($self, $res, @) { return $res + 1 });
+}
+
+my $derived = TestDerived->new(subject => $test);
+
+is($derived->hop(1, 2), 3, 'hop');
+is($derived->rehop(1, 2), 4, 'rehop');
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
+  $derived->hop_cb(1, 2)->(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 3, 'hop_cb');
+}
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
+  $derived->rehop_cb(1, 2)->(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 4, 'rehop_cb');
+}
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
+  $derived->hop_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 3, 'hop_p');
+}
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
+  $derived->rehop_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 4, 'rehop_p');
 }
 
 done_testing;

@@ -210,16 +210,24 @@ or contribute the implementation of other methods.
 
 =head3 wrap_method
 
+=head4 Calling a class method
+
   wrap_method($name => $delegate, sub ($self, ...) { ... }, sub ($self, $res, ...));
 
 This method (which is the only one that can be exported by this module) is there
 to help implement API client library using C<UserAgent::Any> and expose methods
 handling callback and promise without having to implement them all.
 
-You need a class that can handle methods C<foo>, C<foo_cb>, and C<foo_p> with
-the same semantics as the user agent methods above. This will typically be the
-methods for C<UserAgent::Any> itself. Then, if you want to expose a method
-C<bar> that depends on C<foo> you can write:
+The call above will generate in your class a set of method named with C<$name>
+and the (optional) suffix C<_cb> and C<_p>, that will call the methods named
+with C<$delegate> and the same suffix on the same object, passing it the result
+of the first code reference and passing the result of that call to the second
+code reference.
+
+For example, if you have a class that can handle methods C<foo>, C<foo_cb>, and
+C<foo_p> with the same semantics as the user agent methods above (this will
+typically be the methods for C<UserAgent::Any> itself) and you want to expose a
+method C<bar> that depends on C<foo> you can write:
 
   wrap_method('bar' => 'foo', sub ($self, @args) { make_args_for_foo($@args) });
 
@@ -246,6 +254,15 @@ with the result of the call.
 If you don’t pass a second callback, then the callback, promise or method will
 return the default result from the invoked method, without any transformation.
 
+=head4 Calling a method of a class member
+
+  wrap_method($name => \&method, $delegate, $cb1[, $cb2]);
+
+Alternatively to the above, C<wrap_method> can be used to wrap a method of a
+class member. Instead of calling the method named C<$delegate> in your class,
+the call above will call the method named C<$delegate> on the reference returned
+by the call to C<&method>.
+
 =head3 Example
 
 Here is a minimal example on how to create a client library for a hypothetical
@@ -267,8 +284,6 @@ directly derive from C<MyPackage> without issues.
 
   use namespace::clean;
 
-  our $VERSION = 0.01;
-
   has ua => (
     is => 'ro',
     handles => 'UserAgent::Any',
@@ -277,6 +292,28 @@ directly derive from C<MyPackage> without issues.
   );
 
   wrap_method(create_document => 'post', sub ($self, %opts) {
+    return ('https://example.com/create/'.$opts{document_id}, $opts{content});
+  });
+
+Or, if you don’t want to re-expose the C<UserAgent::Any> method in your class
+directly (possibly because you want to re-use the same name), you can do:
+
+  package MyPackage;
+
+  use 5.036;
+
+  use Moo;
+  use UserAgent::Any 'wrap_method';
+
+  use namespace::clean;
+
+  has ua => (
+    is => 'ro',
+    coerce => sub { UserAgent::Any->new($_[0]) },
+    required => 1,
+  );
+
+  wrap_method(create_document => \&ua => 'post', sub ($self, %opts) {
     return ('https://example.com/create/'.$opts{document_id}, $opts{content});
   });
 

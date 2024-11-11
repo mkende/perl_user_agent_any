@@ -20,7 +20,17 @@ BEGIN {
 }
 
 sub get_ua {
-  my $underlying_ua = AnyEvent::UserAgent->new();
+  # The Test::HTTP::MockServer that we are using in the test suite does not
+  # implement persistent connection and this is not handled correctly by
+  # AnyEvent::UserAgent (and/or the underlying AnyEvent::HTTP, it is unclear
+  # which lib is at fault).
+  #
+  # For some repro of the issue, see:
+  # https://rt.cpan.org/Ticket/Display.html?id=156970
+  #
+  # In any case, we can work around it by setting `persistent => 0` so that the
+  # library does not even try to reuse the connection.
+  my $underlying_ua = AnyEvent::UserAgent->new(persistent => 0);
   return UserAgent::Any->new($underlying_ua);
 }
 

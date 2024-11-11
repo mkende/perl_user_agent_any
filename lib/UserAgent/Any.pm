@@ -3,12 +3,20 @@ package UserAgent::Any;
 use 5.036;
 
 use Carp;
+use Exporter 'import';
 use Moo;
 use Scalar::Util 'blessed';
 
-use namespace::clean;
+use namespace::clean -except => ['import'];
 
 our $VERSION = 0.01;
+our @EXPORT_OK = ('wrap_method');
+
+# The class hierarchy here is somehow inside out. When you call
+# UserAgent::Any->new, the constructor in fact delegates to one of the
+# implementations class which are (ISA) UserAgent::Any. This makes deriving from
+# this class be a little difficult. Instead you should in general use
+# composition and delegation.
 
 sub new ($class, $ua) {
   croak 'Passed User Agent object must be a blessed reference' unless blessed($ua);
@@ -29,6 +37,41 @@ sub new ($class, $ua) {
   } else {
     croak 'Unknown User Agent type "'.ref($ua).'"';
   }
+}
+
+sub _wrap_response {
+  return undef unless @_;  ## no critic (ProhibitExplicitReturnUndef)
+  return @_ if @_ == 1;
+  return \@_;
+}
+
+sub wrap_method ($name, $method, $code, $cb = undef) {
+  my $dest_pkg = caller(0);
+  no strict 'refs';  ## no critic (ProhibitNoStrict)
+  if (defined $cb) {
+    *{"${dest_pkg}::${name}"} = sub ($this, @args) {
+      $cb->($this, _wrap_response($this->$method($code->($this, @args))), @args);
+    };
+    my $method_cb = "${method}_cb";
+    *{"${dest_pkg}::${name}_cb"} = sub ($this, @args) {
+      return sub ($final_cb) {
+        $this->$method_cb($code->($this, @args))
+            ->(sub { $final_cb->($cb->($this, &_wrap_response, @args)) });
+      }
+    };
+    my $method_p = "${method}_p";
+    *{"${dest_pkg}::${name}_p"} = sub ($this, @args) {
+      $this->$method_p($code->($this, @args))
+          ->then(sub { $cb->($this, &_wrap_response, @args) });
+    };
+  } else {
+    *{"${dest_pkg}::${name}"} = sub ($this, @args) { $this->$method($code->($this, @args)) };
+    my $method_cb = "${method}_cb";
+    *{"${dest_pkg}::${name}_cb"} = sub ($this, @args) { $this->$method_cb($code->($this, @args)) };
+    my $method_p = "${method}_p";
+    *{"${dest_pkg}::${name}_p"} = sub ($this, @args) { $this->$method_p($code->($this, @args)) };
+  }
+  return;
 }
 
 1;
@@ -115,7 +158,7 @@ The wrapped object must be an instance of a
 L<supported user agent|/Supported user agent>. Feel free to ask for or
 contribute new implementations.
 
-=head2 Methods
+=head2 User agent methods
 
 =head3 get
 
@@ -143,6 +186,80 @@ alternating key-value pairs.
 Modern REST application should only use the C<GET> and C<POST> verbs so these
 are the only one implemented currently. If you need them, feel free to ask for
 or contribute the implementation of other methods.
+
+=head2 Using UserAgent::Any in client APIs
+
+=head3 wrap_method
+
+  wrap_method($name => $delegate, sub ($self, ...) { ... }, sub ($self, $res, ...));
+
+This method (which is the only one that can be exported by this module) is there
+to help implement API client library using C<UserAgent::Any> and expose methods
+handling callback and promise without having to implement them all.
+
+You need a class that can handle methods C<foo>, C<foo_cb>, and C<foo_p> with
+the same semantics as the user agent methods above. This will typically be the
+methods for C<UserAgent::Any> itself. Then, if you want to expose a method
+C<bar> that depends on C<foo> you can write:
+
+  wrap_method('bar' => 'foo', sub ($self, @args) { make_args_for_foo($@args) });
+
+And this will expose in your package a set of C<bar>, C<bar_cb>, and C<bar_p>
+methods with the same semantics that will use the provided method reference to
+build the arguments to C<foo>. For the synchronous case, the method from the
+example above will be equivalent to:
+
+  sub bar ($self, @args) { $self->foo($self, make_args_for_foo(@args))}
+
+You can optionally pass a second callback that will be called with the response
+from the wrapped method:
+
+  wrap_method($name => $delegate, $cb, sub ($self, $res, ...));
+
+The second callback will be called with the current object, the response from
+the wrapped method and the arguments that were passed to the wrappers (the same
+that were already passed to the first callback). The wrapped method will be
+called in list context. If it returns exactly 1 result, then that result is
+passed as-is to the second callback; if it returns 0 result, then the callback
+will receive C<undef>; otherwise the callback will receive an array reference
+with the result of the call.
+
+If you don’t pass a second callback, then the callback, promise or method will
+return the default result from the invoked method, without any transformation.
+
+=head3 Example
+
+Here is a minimal example on how to create a client library for a hypothetical
+service exposing a C<create> call using the C<POST> method.
+
+Note in particular that, to bring the C<post> method from C<UserAgent::Any> in
+C<MyPackage>, we are using L<Moo> delegation to the C<UserAgent::Any::Impl>
+package, which is the L<Moo::Role> actually containing the user agents method.
+
+Another class extending C<MyPackage> would not need this trick and could
+directly derive from C<MyPackage> without issues.
+
+  package MyPackage;
+
+  use 5.036;
+
+  use Moo;
+  use UserAgent::Any 'wrap_method';
+
+  use namespace::clean;
+
+  our $VERSION = 0.01;
+
+  has ua => (
+    is => 'ro',
+    handles => 'UserAgent::Any::Impl',
+    coerce => sub { UserAgent::Any->new($_[0]) },
+    required => 1,
+  );
+
+  wrap_method(create_document => 'post', sub ($self, %opts) {
+    return ('https://example.com/create/'.$opts{document_id}, $opts{content});
+  });
 
 =head1 BUGS AND LIMITATIONS
 

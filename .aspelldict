@@ -1,4 +1,5 @@
-personal_ws-1.1 en 32 
+personal_ws-1.1 en 40 
+APIs
 AnyEvent
 AnyEventUserAgent
 Baz
@@ -6,6 +7,7 @@ HttpPromise
 HttpPromiseResponse
 HttpResponse
 IOLoop
+ISA
 Impl
 Kende
 LWP
@@ -14,14 +16,20 @@ MERCHANTABILITY
 Mojo
 MojoMessageResponse
 MojoUserAgent
+MyPackage
 NONINFRINGEMENT
+ProhibitExplicitReturnUndef
+ProhibitNoStrict
 RPC
 RequireArgUnpacking
 UTF
 UserAgent
+args
 async
 cb
 condvar
+dest
+namespace
 params
 req
 ro

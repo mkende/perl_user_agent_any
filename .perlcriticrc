@@ -72,3 +72,6 @@ allow_delegation_to = get_post_args
 
 [Perl::Critic::Policy::ControlStructures::ProhibitCascadingIfElse]
 max_elsif = 4
+
+[Subroutines::RequireArgUnpacking]
+short_subroutine_statements = 3

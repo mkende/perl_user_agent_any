@@ -78,6 +78,13 @@ Returns the response status message attribute explaining the response code.
 
 =head3 content
 
+  my $bool = $res->success;
+
+Returns whether the request was successful (which typically means that the
+status code is in the C<200 .. 299> range).
+
+=head3 content
+
   my $bytes = $res->content;
 
 Returns the decoded response content according to the C<Content-Encoding>

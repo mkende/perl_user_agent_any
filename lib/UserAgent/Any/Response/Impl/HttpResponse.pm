@@ -19,6 +19,10 @@ sub status_text ($this) {
   return $this->{res}->message;
 }
 
+sub success ($this) {
+  return $this->{res}->is_success;
+}
+
 sub content ($this) {
   return $this->{res}->decoded_content;
 }

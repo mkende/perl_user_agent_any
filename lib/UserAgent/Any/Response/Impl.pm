@@ -13,6 +13,6 @@ has res => (
   required => 1,
 );
 
-requires qw(status_code status_text content raw_content headers header);
+requires qw(status_code status_text success content raw_content headers header);
 
 1;

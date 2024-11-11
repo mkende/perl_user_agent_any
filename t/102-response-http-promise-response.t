@@ -22,6 +22,7 @@ isa_ok($r, ['UserAgent::Any::Response', 'UserAgent::Any::Response::Impl::HttpPro
 is($r->res, exact_ref($raw_response), 'res');
 is($r->status_code, 200, 'status_code');
 is($r->status_text, 'success', 'status_text');
+is($r->success, T(), 'success');
 is($r->raw_content, $raw_content, 'raw_content');
 is($r->content, $utf8_content, 'content');
 is($r->header('Baz'), 'bin', 'header1');

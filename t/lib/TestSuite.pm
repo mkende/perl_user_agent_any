@@ -43,6 +43,7 @@ sub _stop_server {
 
 my %get = ('' => 'get', 'cb' => 'get_cb', 'p' => 'get_p');
 my %post = ('' => 'post', 'cb' => 'post_cb', 'p' => 'post_p');
+my %delete = ('' => 'delete', 'cb' => 'delete_cb', 'p' => 'delete_p');
 
 my @tests = (
   [
@@ -63,6 +64,12 @@ my @tests = (
     sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/get-method") },
     sub ($r) {
       is($r->content, 'POST');
+    }
+  ],[
+    'delete',
+    sub ($ua, $mode) { $ua->${\$delete{$mode}}($mock->url_base()."/get-method") },
+    sub ($r) {
+      is($r->content, 'DELETE');
     }
   ],[
     'post echo',
@@ -127,7 +134,7 @@ sub run ($get_ua, $start_loop = undef, $stop_loop = undef) {
 
   for my $run (@runner) {
     my ($run_name, $suffix, $handler) = @{$run};
-    next if $run_name ne 'sync'; # && !defined $start_loop;
+    next if $run_name ne 'sync' && !defined $start_loop;
     subtest_streamed $run_name, {no_fork => 1} => sub {
       for my $t (@tests) {
         my ($test_name, $req_emiter, $res_processor) = @{$t};

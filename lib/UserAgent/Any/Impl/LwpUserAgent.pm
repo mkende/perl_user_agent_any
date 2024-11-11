@@ -38,6 +38,18 @@ sub post_p ($this, $url, %params) {
   croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
 }
 
+sub delete ($this, $url, @params) {
+  return $this->new_response($this->{ua}->delete($url, @params));
+}
+
+sub delete_cb ($this, $url, @params) {
+  croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
+}
+
+sub delete_p ($this, $url, @params) {
+  croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
+}
+
 1;
 
 __END__

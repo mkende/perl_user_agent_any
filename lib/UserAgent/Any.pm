@@ -88,7 +88,9 @@ has ua => (
   required => 1,
 );
 
-requires qw(get get_cb get_p post post_cb post_p);
+my @methods = qw(get post delete);
+
+requires map { ($_, $_.'_cb', $_.'_p') } @methods;
 
 1;
 
@@ -199,6 +201,21 @@ alternating key-value pairs.
   $ua->post_cb($url, %params, $content)->($cb);
 
   my $promise = $ua->post_p($url, %params, $content);
+
+This is similar to the C<get> method except that the call uses the C<POST> HTTP
+verb. in addition to the C<$url> and C<%params> (which is still actually a
+C<@params>), this method can take an optional C<$content> scalar that will be
+sent as the body of the request.
+
+=head3 delete
+
+  my $res = $ua->delete($url, %params);
+
+  $ua->delete_cb($url, %params)->($cb);
+
+  my $promise = $ua->delete_p($url, %params);
+
+Same as the C<get> method, but uses the C<DELETE> HTTP verb for the request.
 
 =head3 Where are the other methods?
 

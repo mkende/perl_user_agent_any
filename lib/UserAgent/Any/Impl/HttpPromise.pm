@@ -65,6 +65,26 @@ sub post_p {
   )->then(sub { $this->new_response($_[0]) });
 }
 
+sub delete ($this, $url, @params) {
+  my $p = $this->{ua}->delete($url, %{UserAgent::Any::Impl::params_to_hash(@params)})
+      ->then(sub { return $_[0] });
+  my @r = await($p);
+  return $this->new_response(@r);
+}
+
+sub delete_cb ($this, $url, @params) {
+  return sub ($cb) {
+    $this->{ua}->delete($url, %{UserAgent::Any::Impl::params_to_hash(@params)})
+        ->then(sub { $cb->($this->new_response($_[0])) });
+    return;
+  }
+}
+
+sub delete_p ($this, $url, @params) {
+  return $this->{ua}->delete($url, %{UserAgent::Any::Impl::params_to_hash(@params)})
+      ->then(sub { $this->new_response($_[0]) });
+}
+
 1;
 
 __END__

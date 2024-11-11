@@ -79,6 +79,36 @@ sub post_p {
   return $p->promise();
 }
 
+sub delete ($this, $url, @params) {
+  my $cv = AnyEvent->condvar;
+  my $r;
+  $this->{ua}->delete(
+    $url,
+    %{UserAgent::Any::Impl::params_to_hash(@params)},
+    sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  return $this->new_response($r);
+}
+
+sub delete_cb ($this, $url, @params) {
+  return sub ($cb) {
+    $this->{ua}->delete(
+      $url,
+      %{UserAgent::Any::Impl::params_to_hash(@params)},
+      sub ($res) { $cb->($this->new_response($res)) });
+    return;
+  };
+}
+
+sub delete_p ($this, $url, @params) {
+  my $p = Promise::XS::deferred();
+  $this->{ua}->delete(
+    $url,
+    %{UserAgent::Any::Impl::params_to_hash(@params)},
+    sub ($res) { $p->resolve($this->new_response($res)) });
+  return $p->promise();
+}
+
 1;
 
 __END__

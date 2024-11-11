@@ -75,3 +75,7 @@ max_elsif = 4
 
 [Subroutines::RequireArgUnpacking]
 short_subroutine_statements = 3
+
+# We are writing a HTTP UserAgent, so we need such a method.
+[Subroutines::ProhibitBuiltinHomonyms]
+allow = delete

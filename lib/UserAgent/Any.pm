@@ -31,7 +31,7 @@ sub new ($class, $ua) {
   } elsif ($ua isa HTTP::Promise) {
     require UserAgent::Any::Impl::HttpPromise;
     return UserAgent::Any::Impl::HttpPromise->new(ua => $ua);
-  } elsif ($ua isa UserAgent::Any) {
+  } elsif ($ua->DOES('UserAgent::Any')) {
     return $ua;
   } else {
     croak 'Unknown User Agent type "'.ref($ua).'"';
@@ -44,31 +44,38 @@ sub _wrap_response {
   return \@_;
 }
 
-sub wrap_method ($name, $method, $code, $cb = undef) {
+sub wrap_method {  ## no critic (RequireArgUnpacking)
+  my $name = shift;
+  my $member = shift if ref($_[0]) eq 'CODE';  ## no critic (ProhibitConditionalDeclarations)
+  my ($method, $code, $cb) = @_;
   my $dest_pkg = caller(0);
   no strict 'refs';  ## no critic (ProhibitNoStrict)
+  my $get_obj = defined $member ? sub ($this) { $this->$member() } : sub ($this) { $this };
   if (defined $cb) {
     *{"${dest_pkg}::${name}"} = sub ($this, @args) {
-      $cb->($this, _wrap_response($this->$method($code->($this, @args))), @args);
+      $cb->($this, _wrap_response($get_obj->($this)->$method($code->($this, @args))), @args);
     };
     my $method_cb = "${method}_cb";
     *{"${dest_pkg}::${name}_cb"} = sub ($this, @args) {
       return sub ($final_cb) {
-        $this->$method_cb($code->($this, @args))
+        $get_obj->($this)->$method_cb($code->($this, @args))
             ->(sub { $final_cb->($cb->($this, &_wrap_response, @args)) });
       }
     };
     my $method_p = "${method}_p";
     *{"${dest_pkg}::${name}_p"} = sub ($this, @args) {
-      $this->$method_p($code->($this, @args))
+      $get_obj->($this)->$method_p($code->($this, @args))
           ->then(sub { $cb->($this, &_wrap_response, @args) });
     };
   } else {
-    *{"${dest_pkg}::${name}"} = sub ($this, @args) { $this->$method($code->($this, @args)) };
+    *{"${dest_pkg}::${name}"} =
+        sub ($this, @args) { $get_obj->($this)->$method($code->($this, @args)) };
     my $method_cb = "${method}_cb";
-    *{"${dest_pkg}::${name}_cb"} = sub ($this, @args) { $this->$method_cb($code->($this, @args)) };
+    *{"${dest_pkg}::${name}_cb"} =
+        sub ($this, @args) { $get_obj->($this)->$method_cb($code->($this, @args)) };
     my $method_p = "${method}_p";
-    *{"${dest_pkg}::${name}_p"} = sub ($this, @args) { $this->$method_p($code->($this, @args)) };
+    *{"${dest_pkg}::${name}_p"} =
+        sub ($this, @args) { $get_obj->($this)->$method_p($code->($this, @args)) };
   }
   return;
 }

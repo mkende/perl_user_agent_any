@@ -4,7 +4,6 @@ use 5.036;
 
 use Carp;
 use Exporter 'import';
-use Moo;
 use Scalar::Util 'blessed';
 
 use namespace::clean -except => ['import'];
@@ -14,9 +13,9 @@ our @EXPORT_OK = ('wrap_method');
 
 # The class hierarchy here is somehow inside out. When you call
 # UserAgent::Any->new, the constructor in fact delegates to one of the
-# implementations class which are (ISA) UserAgent::Any. This makes deriving from
-# this class be a little difficult. Instead you should in general use
-# composition and delegation.
+# implementations class which are (ISA) UserAgent::Any::Impl and which have
+# (DOES) the UserAgent::Any role. This makes deriving from this class be a
+# little difficult. Instead you should in general use composition or delegation.
 
 sub new ($class, $ua) {
   croak 'Passed User Agent object must be a blessed reference' unless blessed($ua);
@@ -73,6 +72,16 @@ sub wrap_method ($name, $method, $code, $cb = undef) {
   }
   return;
 }
+
+# Do not define methods after this line, otherwise they are part of the role.
+use Moo::Role;
+
+has ua => (
+  is => 'ro',
+  required => 1,
+);
+
+requires qw(get get_cb get_p post post_cb post_p);
 
 1;
 
@@ -158,6 +167,9 @@ The wrapped object must be an instance of a
 L<supported user agent|/Supported user agent>. Feel free to ask for or
 contribute new implementations.
 
+Note that C<UserAgent::Any> is a L<Moo::Role> and not a class. As such you can
+compose it or delegate to it, but you can’t extend it directly.
+
 =head2 User agent methods
 
 =head3 get
@@ -233,8 +245,8 @@ Here is a minimal example on how to create a client library for a hypothetical
 service exposing a C<create> call using the C<POST> method.
 
 Note in particular that, to bring the C<post> method from C<UserAgent::Any> in
-C<MyPackage>, we are using L<Moo> delegation to the C<UserAgent::Any::Impl>
-package, which is the L<Moo::Role> actually containing the user agents method.
+C<MyPackage>, we are using L<Moo> delegation to the C<UserAgent::Any>
+package, which is an L<Moo::Role> with the user agent methods.
 
 Another class extending C<MyPackage> would not need this trick and could
 directly derive from C<MyPackage> without issues.
@@ -252,7 +264,7 @@ directly derive from C<MyPackage> without issues.
 
   has ua => (
     is => 'ro',
-    handles => 'UserAgent::Any::Impl',
+    handles => 'UserAgent::Any',
     coerce => sub { UserAgent::Any->new($_[0]) },
     required => 1,
   );

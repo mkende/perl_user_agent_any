@@ -3,19 +3,12 @@ package UserAgent::Any::Impl;
 use 5.036;
 
 use List::Util 'pairs';
-use Moo::Role;
+use Moo;
 use UserAgent::Any::Response;
 
 use namespace::clean;
 
 our $VERSION = 0.01;
-
-has ua => (
-  is => 'ro',
-  required => 1,
-);
-
-requires qw(get get_cb get_p post post_cb post_p);
 
 sub get_post_args {  ## no critic (RequireArgUnpacking)
   my ($this, $url) = (shift, shift);

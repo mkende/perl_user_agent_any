@@ -3,7 +3,6 @@ package UserAgent::Any::Response;
 use 5.036;
 
 use Carp;
-use Moo;
 use Scalar::Util 'blessed';
 
 use namespace::clean;
@@ -25,6 +24,16 @@ sub new ($class, $res) {
     croak 'Unknown Response type "'.ref($res).'"';
   }
 }
+
+# Do not define methods after this line, otherwise they are part of the role.
+use Moo::Role;
+
+has res => (
+  is => 'ro',
+  required => 1,
+);
+
+requires qw(status_code status_text success content raw_content headers header);
 
 1;
 

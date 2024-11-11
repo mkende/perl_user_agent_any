@@ -50,25 +50,25 @@ my @tests = (
     sub ($ua, $mode) { $ua->${\$get{$mode}}($mock->url_base()."/index") },
     sub ($r) {
       is($r->status_code, 200, 'status code');
-      is($r->decoded_content, 'hello', 'decoded content');
+      is($r->content, 'hello', 'decoded content');
     }
   ],[
     'get',
     sub ($ua, $mode) { $ua->${\$get{$mode}}($mock->url_base()."/get-method") },
     sub ($r) {
-      is($r->decoded_content, 'GET');
+      is($r->content, 'GET');
     }
   ],[
     'post',
     sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/get-method") },
     sub ($r) {
-      is($r->decoded_content, 'POST');
+      is($r->content, 'POST');
     }
   ],[
     'post echo',
     sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/echo", 'the content') },
     sub ($r) {
-      is($r->decoded_content, 'the content', 'decoded content');
+      is($r->content, 'the content', 'decoded content');
     }
   ],[
     'get multi header',
@@ -90,7 +90,7 @@ my @tests = (
         # In general the UA implementations have some kind of Headers object
         # that they can take to disambiguate between the content and a header
         # called Content.
-        is($r->decoded_content, 'the content');
+        is($r->content, 'the content');
       };
     }
   ],[
@@ -98,7 +98,7 @@ my @tests = (
     sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/content-header", 'Content' => 'the content') },
     sub ($r) {
       todo "unimplemented" => sub {
-        is($r->decoded_content, 'the content');
+        is($r->content, 'the content');
       };
     }
   ],

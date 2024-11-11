@@ -6,8 +6,7 @@ use Moo;
 
 use namespace::clean;
 
-extends 'UserAgent::Any::Response';
-with 'UserAgent::Any::Response::Impl';
+with 'UserAgent::Any::Response';
 
 our $VERSION = 0.01;
 

@@ -21,7 +21,8 @@ $headers->add('Baz' => 'bin');
 
 my $r = CLASS()->new($raw_response);
 
-isa_ok($r, ['UserAgent::Any::Response', 'UserAgent::Any::Response::Impl::MojoMessageResponse']);
+isa_ok($r, 'UserAgent::Any::Response::Impl::MojoMessageResponse');
+DOES_ok($r, 'UserAgent::Any::Response');
 
 is($r->res, exact_ref($raw_response), 'res');
 is($r->status_code, 200, 'status_code');

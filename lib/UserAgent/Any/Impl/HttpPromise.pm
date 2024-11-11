@@ -8,8 +8,8 @@ use Promise::Me;
 
 use namespace::clean;
 
-extends 'UserAgent::Any';
-with 'UserAgent::Any::Impl';
+with 'UserAgent::Any';
+extends 'UserAgent::Any::Impl';
 
 our $VERSION = 0.01;
 

@@ -13,7 +13,7 @@ use TestSuite;  # From our the t/lib directory.
 BEGIN {
   # The shared memory system used by Promise::Me to exchange data with the
   # parent environment seems flaky and the tests randomly fails (often leaving
-  # zombie processes behind).
+  # zombie processes behind). So it’s not executed by default.
   if ($ENV{HARNESS_ACTIVE} && !$ENV{FLAKY_TESTING}) {
     skip_all('Flaky test. Run manually or set $ENV{FLAKY_TESTING} to a true value to run.');
   }
@@ -41,8 +41,13 @@ sub get_ua {
   return UserAgent::Any->new($underlying_ua);
 }
 
-my $done : shared = 0;
+{
+  my $ua = get_ua();
+  isa_ok($ua, ['UserAgent::Any::Impl', 'UserAgent::Any::Impl::HttpPromise']);
+  DOES_ok($ua, 'UserAgent::Any');
+}
 
+my $done : shared = 0;
 TestSuite::run(\&get_ua, sub { 1 until $done; $done = 0 }, sub { $done = 1 });
 
 done_testing;

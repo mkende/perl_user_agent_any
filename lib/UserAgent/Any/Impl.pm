@@ -14,7 +14,7 @@ sub get_post_args {  ## no critic (RequireArgUnpacking)
   my ($this, $url) = (shift, shift);
   my $content;
   $content = pop if @_ % 2;
-  return ($this, $url, \$content, \@_);
+  return ($this, $url, \@_, \$content,);
 }
 
 sub new_response {

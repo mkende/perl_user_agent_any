@@ -44,7 +44,7 @@ sub get_p ($this, $url, @params) {
 }
 
 sub post {
-  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::get_post_args;
+  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
   my $cv = AnyEvent->condvar;
   my $r;
   $this->{ua}->post(
@@ -57,7 +57,7 @@ sub post {
 }
 
 sub post_cb {
-  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::get_post_args;
+  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
   return sub ($cb) {
     $this->{ua}->post(
       $url,
@@ -69,7 +69,7 @@ sub post_cb {
 }
 
 sub post_p {
-  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::get_post_args;
+  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
   my $p = Promise::XS::deferred();
   $this->{ua}->post(
     $url,

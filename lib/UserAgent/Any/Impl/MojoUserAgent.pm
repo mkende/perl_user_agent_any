@@ -32,7 +32,7 @@ sub get_p ($this, $url, @params) {
 }
 
 sub post {
-  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::get_post_args;
+  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
   return $this->new_response(
     $this->{ua}->post(
       $url,
@@ -42,7 +42,7 @@ sub post {
 }
 
 sub post_cb {
-  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::get_post_args;
+  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
   return sub ($cb) {
     $this->{ua}->post(
       $url,
@@ -54,7 +54,7 @@ sub post_cb {
 }
 
 sub post_p {
-  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::get_post_args;
+  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
   return $this->{ua}->post_p(
     $url,
     UserAgent::Any::Impl::params_to_hash(@{$params}),

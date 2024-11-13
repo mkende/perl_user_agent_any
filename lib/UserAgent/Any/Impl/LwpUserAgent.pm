@@ -25,7 +25,7 @@ sub get_p ($this, $url, @params) {
 }
 
 sub post {
-  my ($this, $url, $content, $params) = &UserAgent::Any::Impl::get_post_args;
+  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
   return $this->new_response(
     $this->{ua}->post($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ())));
 }

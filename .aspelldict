@@ -1,4 +1,4 @@
-personal_ws-1.1 en 42 
+personal_ws-1.1 en 43 
 APIs
 AnyEvent
 AnyEventUserAgent
@@ -37,6 +37,7 @@ req
 ro
 sublicense
 subtest
+tx
 ua
 undef
 unicode

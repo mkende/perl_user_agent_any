@@ -4,6 +4,7 @@ use 5.036;
 
 use Carp;
 use Moo;
+use UserAgent::Any::Impl 'get_call_args', 'generate_methods', 'new_response';
 
 use namespace::clean;
 
@@ -12,43 +13,21 @@ extends 'UserAgent::Any::Impl';
 
 our $VERSION = 0.01;
 
-sub get ($this, $url, @params) {
-  return $this->new_response($this->{ua}->get($url, @params));
+sub call {
+  my ($this, $method, $url, $params, $content) = &get_call_args;
+  return new_response($this->{ua}
+        ->$method($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ())));
 }
 
-sub get_cb ($this, $url, @params) {
+sub call_cb ($this, $url, %params) {
   croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
 }
 
-sub get_p ($this, $url, @params) {
+sub call_p ($this, $url, %params) {
   croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
 }
 
-sub post {
-  my ($this, $url, $params, $content) = &UserAgent::Any::Impl::get_post_args;
-  return $this->new_response(
-    $this->{ua}->post($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ())));
-}
-
-sub post_cb ($this, $url, %params) {
-  croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
-}
-
-sub post_p ($this, $url, %params) {
-  croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
-}
-
-sub delete ($this, $url, @params) {
-  return $this->new_response($this->{ua}->delete($url, @params));
-}
-
-sub delete_cb ($this, $url, @params) {
-  croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
-}
-
-sub delete_p ($this, $url, @params) {
-  croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
-}
+BEGIN { generate_methods() }
 
 1;
 

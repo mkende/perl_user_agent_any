@@ -3,8 +3,7 @@
 This Perl library is a wrapper above any UserAgent library, supporting sync and
 async calls.
 
-See the full documentation of this library on [metacpan](https://metacpan.org):
-https://metacpan.org/pod/UserAgent::Any.
+See the full documentation of this library on [metacpan](https://metacpan.org/pod/UserAgent::Any).
 
 Currently supported user agents:
 

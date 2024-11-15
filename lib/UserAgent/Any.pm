@@ -371,6 +371,13 @@ multiple times: all the values will be concatenated (separated by C<, >) and
 sent as a single header. This is supposed to be equivalent but might give a
 different behavior from other implementations.
 
+=item *
+
+The message passing system used by L<HTTP::Promise> (internally based on
+L<Promise::Me>) appears to be unreliable and a program using it might dead-lock
+unexpectedly. If you only want to send requests in the background without
+waiting for their result, then this might not be an issue for you.
+
 =back
 
 =head1 AUTHOR

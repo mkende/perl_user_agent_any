@@ -2,6 +2,7 @@ package UserAgent::Any::Impl;
 
 use 5.036;
 
+use Carp;
 use Exporter 'import';
 use List::Util 'pairs';
 use Moo;
@@ -21,7 +22,8 @@ sub get_call_args {  ## no critic (RequireArgUnpacking)
   my ($this, $method, $url) = (shift, shift, shift);
   my $content;
   $content = pop if @_ % 2 && $METHODS_WITH_DATA{$method};
-  # Todo: test that !(@_ % 2).
+  # Here, we can’t be in the $METHODS_WITH_DATA{$method} case.
+  croak 'Invalid number of arguments, expected an even sized list after the url' if @_ % 2;
   return ($this, $method, $url, \@_, \$content,);
 }
 

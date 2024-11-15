@@ -135,3 +135,16 @@ MAKE_FRAGMENT
 # add to the generated Makefile.
 
 # End of the template. You can add custom content below this line.
+
+sub postamble {
+  return <<"MAKE_FRAGMENT" if supported_platform();
+
+TEST_PM := \$(shell find t -name "*.pm")
+
+tidy: tidy_test
+
+tidy_test:
+\tperltidy -b -bext='/' \$(TEST_PM)
+
+MAKE_FRAGMENT
+}

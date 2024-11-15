@@ -23,7 +23,7 @@ sub _start_server {
     if ($req->uri->path eq '/index' && $req->method eq 'GET') {
       $res->content('hello');
     } elsif ($req->uri->path eq '/get-method') {
-      $res->content($req->method);
+      $res->header('X-method', $req->method);
     } elsif ($req->uri->path eq '/echo' && $req->method eq 'POST') {
       $res->content($req->content);
     } elsif ($req->uri->path eq '/multi-header' and $req->header('X-multi') eq 'Foo, Bar, Baz') {
@@ -41,57 +41,79 @@ sub _stop_server {
   $mock->stop_mock_server();
 }
 
-my %get = ('' => 'get', 'cb' => 'get_cb', 'p' => 'get_p');
-my %post = ('' => 'post', 'cb' => 'post_cb', 'p' => 'post_p');
-my %delete = ('' => 'delete', 'cb' => 'delete_cb', 'p' => 'delete_p');
+# delete get head patch post put
+
+my %suffix = ('' => '', 'cb' => '_cb', 'p' => '_p');
+
+sub send_req ($method, $ua, $mode, @args) {
+  $ua->${\"${method}$suffix{$mode}"}(@args);
+}
 
 my @tests = (
   [
     'get index',
-    sub ($ua, $mode) { $ua->${\$get{$mode}}($mock->url_base()."/index") },
+    sub (@a) { send_req('get', @a, $mock->url_base()."/index") },
     sub ($r) {
       is($r->status_code, 200, 'status code');
       is($r->content, 'hello', 'decoded content');
     }
   ],[
-    'get',
-    sub ($ua, $mode) { $ua->${\$get{$mode}}($mock->url_base()."/get-method") },
+    'delete',
+    sub (@a) { send_req('delete', @a, $mock->url_base()."/get-method") },
     sub ($r) {
-      is($r->content, 'GET');
+      is($r->header('X-method'), 'DELETE');
+    }
+  ],[
+    'get',
+    sub (@a) { send_req('get', @a, $mock->url_base()."/get-method") },
+    sub ($r) {
+      is($r->header('X-method'), 'GET');
+    }
+  ],[
+    'head',
+    sub (@a) { send_req('head', @a, $mock->url_base()."/get-method") },
+    sub ($r) {
+      is($r->header('X-method'), 'HEAD');
+    }
+  ],[
+    'patch',
+    sub (@a) { send_req('patch', @a, $mock->url_base()."/get-method") },
+    sub ($r) {
+      is($r->header('X-method'), 'PATCH');
     }
   ],[
     'post',
-    sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/get-method") },
+    sub (@a) { send_req('post', @a, $mock->url_base()."/get-method") },
     sub ($r) {
-      is($r->content, 'POST');
+      is($r->header('X-method'), 'POST');
     }
   ],[
-    'delete',
-    sub ($ua, $mode) { $ua->${\$delete{$mode}}($mock->url_base()."/get-method") },
+    'put',
+    sub (@a) { send_req('put', @a, $mock->url_base()."/get-method") },
     sub ($r) {
-      is($r->content, 'DELETE');
+      is($r->header('X-method'), 'PUT');
     }
   ],[
     'post echo',
-    sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/echo", 'the content') },
+    sub (@a) { send_req('post', @a, $mock->url_base()."/echo", 'the content') },
     sub ($r) {
       is($r->content, 'the content', 'decoded content');
     }
   ],[
     'get multi header',
-    sub ($ua, $mode) { $ua->${\$get{$mode}}($mock->url_base()."/multi-header", 'X-multi' => 'Foo', 'X-multi' => 'Bar', 'X-multi' => 'Baz') },
+    sub (@a) { send_req('get', @a, $mock->url_base()."/multi-header", 'X-multi' => 'Foo', 'X-multi' => 'Bar', 'X-multi' => 'Baz') },
     sub ($r) {
       is($r->status_code, 200);
     }
   ],[
     'post multi header',
-    sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/multi-header", 'X-multi' => 'Foo', 'X-multi' => 'Bar', 'X-multi' => 'Baz') },
+    sub (@a) { send_req('post', @a, $mock->url_base()."/multi-header", 'X-multi' => 'Foo', 'X-multi' => 'Bar', 'X-multi' => 'Baz') },
     sub ($r) {
       is($r->status_code, 200);
     }
   ],[
     'get content header',
-    sub ($ua, $mode) { $ua->${\$get{$mode}}($mock->url_base()."/content-header", 'Content' => 'the content') },
+    sub (@a) { send_req('get', @a, $mock->url_base()."/content-header", 'Content' => 'the content') },
     sub ($r) {
       todo "unimplemented" => sub {
         # In general the UA implementations have some kind of Headers object
@@ -102,7 +124,7 @@ my @tests = (
     }
   ],[
     'post content header',
-    sub ($ua, $mode) { $ua->${\$post{$mode}}($mock->url_base()."/content-header", 'Content' => 'the content') },
+    sub (@a) { send_req('post', @a, $mock->url_base()."/content-header", 'Content' => 'the content') },
     sub ($r) {
       todo "unimplemented" => sub {
         is($r->content, 'the content');

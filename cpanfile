@@ -32,6 +32,7 @@ on 'develop' => sub {
 # End of the template. You can add custom content below this line.
 
 requires 'Moo';
+requires 'Readonly';
 requires 'namespace::clean';
 
 feature 'LwpUserAgent', 'Support for LWP::UserAgent' => sub {
@@ -58,6 +59,6 @@ feature 'MojoUserAgent', 'Support for Moje::UserAgent' => sub {
 
 on 'test' => sub {
   requires 'AnyEvent';
-  requires 'Test::HTTP::MockServer'; #, '0.0.2';  # not yet released.
+  requires 'Test::HTTP::MockServer';  #, '0.0.2';  # not yet released.
   requires 'Promise::XS';
 }

@@ -13,6 +13,7 @@ use TestSuite;  # From our the t/lib directory.
 BEGIN {
   eval 'use AnyEvent::UserAgent';  ## no critic (ProhibitStringyEval, RequireCheckingReturnValueOfEval)
   skip_all('AnyEvent::UserAgent is not installed') if $@;
+  skip_all('Requires AnyEvent::UserAgent 0.09') if $AnyEvent::UserAgent::VERSION < '0.09';
   eval 'use Promise::XS';  ## no critic (ProhibitStringyEval, RequireCheckingReturnValueOfEval)
   skip_all('Promise::XS is not installed') if $@;
   eval 'use AnyEvent';  ## no critic (ProhibitStringyEval, RequireCheckingReturnValueOfEval)

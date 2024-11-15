@@ -217,11 +217,37 @@ sent as the body of the request.
 
 Same as the C<get> method, but uses the C<DELETE> HTTP verb for the request.
 
-=head3 Where are the other methods?
+=head3 patch
 
-Modern REST application should only use the C<GET> and C<POST> verbs so these
-are the only one implemented currently. If you need them, feel free to ask for
-or contribute the implementation of other methods.
+  my $res = $ua->patch($url, %params, $content);
+
+  $ua->patch_cb($url, %params, $content)->($cb);
+
+  my $promise = $ua->patch_p($url, %params, $content);
+
+Same as the C<post> method, but uses the C<PATCH> HTTP verb for the request.
+
+=head3 put
+
+  my $res = $ua->put($url, %params, $content);
+
+  $ua->put_cb($url, %params, $content)->($cb);
+
+  my $promise = $ua->put_p($url, %params, $content);
+
+Same as the C<post> method, but uses the C<PUT> HTTP verb for the request.
+
+=head3 HEAD
+
+  my $res = $ua->head($url, %params);
+
+  $ua->head_cb($url, %params)->($cb);
+
+  my $promise = $ua->head_p($url, %params);
+
+Same as the C<get> method, but uses the C<HEAD> HTTP verb for the request. Note
+that it means that in general the user agent will ignore the content returned by
+the server (except for the headers), even if some content is returned.
 
 =head2 Using UserAgent::Any in client APIs
 

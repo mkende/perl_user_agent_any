@@ -5,6 +5,7 @@ use 5.036;
 use Exporter 'import';
 use List::Util 'pairs';
 use Moo;
+use Readonly;
 use UserAgent::Any::Response;
 
 use namespace::clean -except => ['import'];
@@ -13,19 +14,21 @@ our @EXPORT_OK = qw(get_call_args generate_methods new_response);
 
 our $VERSION = 0.01;
 
+Readonly my @METHODS => qw(delete get head patch post put);
+Readonly my %METHODS_WITH_DATA => map { $_ => 1 } qw(patch post put);
+
 sub get_call_args {  ## no critic (RequireArgUnpacking)
   my ($this, $method, $url) = (shift, shift, shift);
   my $content;
-  $content = pop if @_ % 2;
+  $content = pop if @_ % 2 && $METHODS_WITH_DATA{$method};
+  # Todo: test that !(@_ % 2).
   return ($this, $method, $url, \@_, \$content,);
 }
 
 sub generate_methods {
   my $dest_pkg = caller(0);
 
-  my @methods = qw(get post delete);
-
-  for my $m (@methods) {
+  for my $m (@METHODS) {
     no strict 'refs';  ## no critic (ProhibitNoStrict)
     *{"${dest_pkg}::${m}"} = sub ($this, @args) { $this->call($m, @args) };
     *{"${dest_pkg}::${m}_cb"} = sub ($this, @args) { $this->call_cb($m, @args) };

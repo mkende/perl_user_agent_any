@@ -15,8 +15,9 @@ our $VERSION = 0.01;
 
 sub call {
   my ($this, $method, $url, $params, $content) = &get_call_args;
-  return new_response($this->{ua}
-        ->$method($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ())));
+  my $r = $this->{ua}
+        ->$method($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ()));
+  return new_response($r);
 }
 
 sub call_cb ($this, $url, %params) {

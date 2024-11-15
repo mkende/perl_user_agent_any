@@ -131,7 +131,8 @@ contribute new features if needed.
 =head3 L<LWP::UserAgent>
 
 When using an L<LWP::UserAgent>, a C<UserAgent::Any> object only implements the
-synchronous calls (without the C<_cb> or C<_p> suffixes).
+synchronous calls (without the C<_cb> or C<_p> suffixes) and the asynchronous
+ones will throw exceptions when called.
 
 =head3 L<Mojo::UserAgent>
 
@@ -179,6 +180,22 @@ contribute new implementations.
 Note that C<UserAgent::Any> is a L<Moo::Role> and not a class. As such you can
 compose it or delegate to it, but you can’t extend it directly.
 
+=head2 Synchronous and asynchronous supports
+
+When supported by the underlying user agent, all the C<UserAgent::Any> methods
+exist in 3 versions. The synchronous version, without a suffix, and two
+asynchronous versions, one taking a callback executed when the call is done and
+one returning a promise that is fulfilled with the result of the call
+
+Note that, as documented above in L<supported user agent|Supported user agents>,
+the asynchronous methods will throw an exception if the object is built with a
+user agent that does not support asynchronous calls.
+
+See the documentation of the L<C<get()> method|/get> for more explanation on the
+asynchronous support. And see the documentation of the
+L<C<wrap_method()> function|/wrap_method> to learn how you can easily expose
+sets of methods with the same sync/async semantics in your own library.
+
 =head2 User agent methods
 
 =head3 get
@@ -189,10 +206,32 @@ compose it or delegate to it, but you can’t extend it directly.
 
   my $promise = $ua->get_p($url, %params);
 
-Note that while the examples above are using C<%params>, the parameters are
-actually treated as a list as the same key can appear multiple times to send the
-same header multiple time. But that list must be an even-sized list of
-alternating key-value pairs.
+Execute an HTTP call with the C<GET> verb to the given url and with the
+specified parameters, passed as request headers.
+
+Note that, while the examples above are using C<%params>, the arguments are
+actually treated as a list and the same key can appear multiple times to send
+the same header multiple times. So, that list of arguments must still be an
+even-sized list of alternating key-value pairs.
+
+Like all the user agent methods below, the synchronous C<get()> returns a
+L<UserAgent::Any::Response> object, the asynchronous-with-callback C<get_cb()>
+returns a code-reference expecting a callback that will be called with an
+L<UserAgent::Any::Response> object, and the promise based C<get_p()> will return
+a promise, whose type depends on the type of user agent used, and that will be
+fulfilled with a L<UserAgent::Any::Response> object once the request returns.
+
+Note that the two steps call to C<get_cb()> is just syntactic sugar and the
+actual GET call is done after the callback is passed. Nothing will happen if the
+code reference returned by C<get_cb()> is not called.
+
+If an error happens (like an invalid argument) these methods will throw an
+exception synchronously in the initial call. It is unlikely (but possible) that
+the methods fail during the processing of the request in which case the error
+handling depends on the underlying user agent asynchronous model. With the
+callback based methods you can generally not catch the errors while the promise
+based one can allow it (in general through a C<catch()> method or a second
+argument to the C<then()> method).
 
 =head3 post
 
@@ -202,10 +241,10 @@ alternating key-value pairs.
 
   my $promise = $ua->post_p($url, %params, $content);
 
-This is similar to the C<get> method except that the call uses the C<POST> HTTP
-verb. in addition to the C<$url> and C<%params> (which is still actually a
-C<@params>), this method can take an optional C<$content> scalar that will be
-sent as the body of the request.
+This is similar to the C<get> method, except that the call uses the C<POST> HTTP
+verb. Also, in addition to the C<$url> and C<%params> (which is still actually a
+C<@params>) arguments, this method can take an optional C<$content> scalar that
+will be sent as the body of the request.
 
 =head3 delete
 
@@ -237,7 +276,7 @@ Same as the C<post> method, but uses the C<PATCH> HTTP verb for the request.
 
 Same as the C<post> method, but uses the C<PUT> HTTP verb for the request.
 
-=head3 HEAD
+=head3 head
 
   my $res = $ua->head($url, %params);
 
@@ -308,15 +347,12 @@ by the call to C<&method>.
 
 =head3 Example
 
-Here is a minimal example on how to create a client library for a hypothetical
-service exposing a C<create> call using the C<POST> method.
+Here is are two minimal example on how to create a client library for a
+hypothetical service exposing a C<create> call using the C<POST> method.
 
-Note in particular that, to bring the C<post> method from C<UserAgent::Any> in
-C<MyPackage>, we are using L<Moo> delegation to the C<UserAgent::Any>
-package, which is an L<Moo::Role> with the user agent methods.
-
-Another class extending C<MyPackage> would not need this trick and could
-directly derive from C<MyPackage> without issues.
+Note in particular that, in the first example, to bring the C<post> method from
+C<UserAgent::Any> in C<MyPackage>, we are using L<Moo> delegation to the
+C<UserAgent::Any> package, which is an L<Moo::Role> with the user agent methods:
 
   package MyPackage;
 
@@ -339,7 +375,7 @@ directly derive from C<MyPackage> without issues.
   });
 
 Or, if you don’t want to re-expose the C<UserAgent::Any> method in your class
-directly (possibly because you want to re-use the same name), you can do:
+directly (possibly because you want to re-use the same names), you can do:
 
   package MyPackage;
 

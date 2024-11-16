@@ -12,12 +12,6 @@ use namespace::clean -except => ['import'];
 our $VERSION = 0.01;
 our @EXPORT_OK = ('wrap_method');
 
-# The class hierarchy here is somehow inside out. When you call
-# UserAgent::Any->new, the constructor in fact delegates to one of the
-# implementations class which are (ISA) UserAgent::Any::Impl and which have
-# (DOES) the UserAgent::Any role. This makes deriving from this class be a
-# little difficult. Instead you should in general use composition or delegation.
-
 sub _wrap_response {
   return undef unless @_;  ## no critic (ProhibitExplicitReturnUndef)
   return @_ if @_ == 1;

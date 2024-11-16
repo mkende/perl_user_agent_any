@@ -13,12 +13,8 @@ our $VERSION = 0.01;
 
 sub call {
   my ($self, $method, $url, $params, $content) = &get_call_args;
-  return new_response(
-    $self->{ua}->$method(
-      $url,
-      params_to_hash(@{$params}),
-      (defined ${$content} ? ${$content} : ())
-    )->res);
+  return new_response($self->{ua}
+        ->$method($url, params_to_hash(@{$params}), (defined ${$content} ? ${$content} : ()))->res);
 }
 
 sub call_cb {
@@ -35,11 +31,9 @@ sub call_cb {
 
 sub call_p {
   my ($self, $method, $url, $params, $content) = &get_call_args;
-  return $self->{ua}->${\"${method}_p"}(
-    $url,
-    params_to_hash(@{$params}),
-    (defined ${$content} ? ${$content} : ())
-  )->then(sub ($tx) { new_response($tx->res) });
+  return $self->{ua}->${\"${method}_p"}
+      ($url, params_to_hash(@{$params}), (defined ${$content} ? ${$content} : ()))
+      ->then(sub ($tx) { new_response($tx->res) });
 }
 
 BEGIN { generate_methods() }

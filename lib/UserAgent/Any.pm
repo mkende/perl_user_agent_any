@@ -50,32 +50,32 @@ sub wrap_method {  ## no critic (RequireArgUnpacking)
   my ($method, $code, $cb) = @_;
   my $dest_pkg = caller(0);
   no strict 'refs';  ## no critic (ProhibitNoStrict)
-  my $get_obj = defined $member ? sub ($this) { $this->$member() } : sub ($this) { $this };
+  my $get_obj = defined $member ? sub ($self) { $self->$member() } : sub ($self) { $self };
   if (defined $cb) {
-    *{"${dest_pkg}::${name}"} = sub ($this, @args) {
-      $cb->($this, _wrap_response($get_obj->($this)->$method($code->($this, @args))), @args);
+    *{"${dest_pkg}::${name}"} = sub ($self, @args) {
+      $cb->($self, _wrap_response($get_obj->($self)->$method($code->($self, @args))), @args);
     };
     my $method_cb = "${method}_cb";
-    *{"${dest_pkg}::${name}_cb"} = sub ($this, @args) {
+    *{"${dest_pkg}::${name}_cb"} = sub ($self, @args) {
       return sub ($final_cb) {
-        $get_obj->($this)->$method_cb($code->($this, @args))
-            ->(sub { $final_cb->($cb->($this, &_wrap_response, @args)) });
+        $get_obj->($self)->$method_cb($code->($self, @args))
+            ->(sub { $final_cb->($cb->($self, &_wrap_response, @args)) });
       }
     };
     my $method_p = "${method}_p";
-    *{"${dest_pkg}::${name}_p"} = sub ($this, @args) {
-      $get_obj->($this)->$method_p($code->($this, @args))
-          ->then(sub { $cb->($this, &_wrap_response, @args) });
+    *{"${dest_pkg}::${name}_p"} = sub ($self, @args) {
+      $get_obj->($self)->$method_p($code->($self, @args))
+          ->then(sub { $cb->($self, &_wrap_response, @args) });
     };
   } else {
     *{"${dest_pkg}::${name}"} =
-        sub ($this, @args) { $get_obj->($this)->$method($code->($this, @args)) };
+        sub ($self, @args) { $get_obj->($self)->$method($code->($self, @args)) };
     my $method_cb = "${method}_cb";
     *{"${dest_pkg}::${name}_cb"} =
-        sub ($this, @args) { $get_obj->($this)->$method_cb($code->($this, @args)) };
+        sub ($self, @args) { $get_obj->($self)->$method_cb($code->($self, @args)) };
     my $method_p = "${method}_p";
     *{"${dest_pkg}::${name}_p"} =
-        sub ($this, @args) { $get_obj->($this)->$method_p($code->($this, @args)) };
+        sub ($self, @args) { $get_obj->($self)->$method_p($code->($self, @args)) };
   }
   return;
 }
@@ -288,28 +288,34 @@ Same as the C<get> method, but uses the C<HEAD> HTTP verb for the request. Note
 that it means that in general the user agent will ignore the content returned by
 the server (except for the headers), even if some content is returned.
 
-=head2 Using UserAgent::Any in client APIs
+=head2 Using UserAgent::Any in client libraries
+
+This section describes how to write higher level client libraries, on top of
+C<UserAgent::Any>, while retaining its benefit (support for any user agents and
+multiple asynchronous models).
 
 =head3 wrap_method
+
+The C<wrap_method()> function (which is the only one that can be exported by
+this module) is there to help implement API client library using
+C<UserAgent::Any> and expose methods handling callback and promise without
+having to implement them all.
 
 =head4 Calling a class method
 
   wrap_method($name => $delegate, sub ($self, ...) { ... }, sub ($self, $res, ...));
 
-This method (which is the only one that can be exported by this module) is there
-to help implement API client library using C<UserAgent::Any> and expose methods
-handling callback and promise without having to implement them all.
+The call above will generate in your class a set of methods named C<$name>,
+C<$name_cb>, and C<$name_p>. These methods will each execute the first sub that
+was passed to C<wrap_method()> and then pass the results to the method named
+with C<$delegate> and a suffix matching that of the function called. The result
+of that call if passed to the second sub, if it was provided, in the right async
+context (in a callback or a C<then> method of a promise).
 
-The call above will generate in your class a set of method named with C<$name>
-and the (optional) suffix C<_cb> and C<_p>, that will call the methods named
-with C<$delegate> and the same suffix on the same object, passing it the result
-of the first code reference and passing the result of that call to the second
-code reference.
-
-For example, if you have a class that can handle methods C<foo>, C<foo_cb>, and
-C<foo_p> with the same semantics as the user agent methods above (this will
-typically be the methods for C<UserAgent::Any> itself) and you want to expose a
-method C<bar> that depends on C<foo> you can write:
+For example, if you have a class that can I<already> handle methods C<foo>,
+C<foo_cb>, and C<foo_p> with the same semantics as the user agent methods above
+(this will typically be the methods for C<UserAgent::Any> itself) and you want
+to expose a method C<bar> that depends on C<foo> you can write:
 
   wrap_method('bar' => 'foo', sub ($self, @args) { make_args_for_foo($@args) });
 

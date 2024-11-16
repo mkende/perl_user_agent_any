@@ -60,7 +60,9 @@ jobs:
       if:  ${{ matrix.os != 'macos' }}
       run: |
         cpanm -V
-        cpanm -v --installdeps --notest --with-configure --with-recommends --with-suggests --with-all-features .
+        cpanm -v --installdeps --notest --with-configure --with-all-features .
+        cpanm -v --installdeps --notest --with-recommends --with-all-features .
+        cpanm -v --installdeps --notest --with-suggests --with-all-features .
 
     # MacOS runners are very costly, so let’s install the minimum amount of
     # dependency.

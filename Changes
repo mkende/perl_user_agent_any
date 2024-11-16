@@ -1,6 +1,6 @@
 Revision history for Perl distribution UserAgent-Any
 
-0.03 - ??
+0.03 - 2024-11-16
 
  - Also simplify the Response object class hierarchy.
 

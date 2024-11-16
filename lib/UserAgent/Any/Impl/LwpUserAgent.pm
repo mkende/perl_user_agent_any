@@ -8,8 +8,7 @@ use UserAgent::Any::Impl 'get_call_args', 'generate_methods', 'new_response';
 
 use namespace::clean;
 
-with 'UserAgent::Any';
-extends 'UserAgent::Any::Impl';
+with 'UserAgent::Any::Impl';
 
 our $VERSION = 0.01;
 

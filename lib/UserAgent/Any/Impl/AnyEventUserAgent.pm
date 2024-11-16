@@ -5,12 +5,11 @@ use 5.036;
 use AnyEvent;
 use Promise::XS;
 use Moo;
-use UserAgent::Any::Impl 'get_call_args', 'generate_methods', 'new_response';
+use UserAgent::Any::Impl 'get_call_args', 'generate_methods', 'new_response', 'params_to_hash';
 
 use namespace::clean;
 
-with 'UserAgent::Any';
-extends 'UserAgent::Any::Impl';
+with 'UserAgent::Any::Impl';
 
 our $VERSION = 0.01;
 
@@ -20,7 +19,7 @@ sub call {
   my $r;
   $self->{ua}->$method(
     $url,
-    %{UserAgent::Any::Impl::params_to_hash(@{$params})},
+    %{params_to_hash(@{$params})},
     (defined ${$content} ? (Content => ${$content}) : ()),
     sub ($res) { $r = $res; $cv->send });
   $cv->recv;
@@ -32,7 +31,7 @@ sub call_cb {
   return sub ($cb) {
     $self->{ua}->$method(
       $url,
-      %{UserAgent::Any::Impl::params_to_hash(@{$params})},
+      %{params_to_hash(@{$params})},
       (defined ${$content} ? (Content => ${$content}) : ()),
       sub ($res) { $cb->(new_response($res)) });
     return;
@@ -44,7 +43,7 @@ sub call_p {
   my $p = Promise::XS::deferred();
   $self->{ua}->$method(
     $url,
-    %{UserAgent::Any::Impl::params_to_hash(@{$params})},
+    %{params_to_hash(@{$params})},
     (defined ${$content} ? (Content => ${$content}) : ()),
     sub ($res) { $p->resolve(new_response($res)) });
   return $p->promise();

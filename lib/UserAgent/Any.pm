@@ -17,27 +17,6 @@ our @EXPORT_OK = ('wrap_method');
 # (DOES) the UserAgent::Any role. This makes deriving from this class be a
 # little difficult. Instead you should in general use composition or delegation.
 
-sub new ($class, $ua) {
-  croak 'Passed User Agent object must be a blessed reference' unless blessed($ua);
-  if ($ua isa LWP::UserAgent) {
-    require UserAgent::Any::Impl::LwpUserAgent;
-    return UserAgent::Any::Impl::LwpUserAgent->new(ua => $ua);
-  } elsif ($ua isa AnyEvent::UserAgent) {
-    require UserAgent::Any::Impl::AnyEventUserAgent;
-    return UserAgent::Any::Impl::AnyEventUserAgent->new(ua => $ua);
-  } elsif ($ua isa Mojo::UserAgent) {
-    require UserAgent::Any::Impl::MojoUserAgent;
-    return UserAgent::Any::Impl::MojoUserAgent->new(ua => $ua);
-  } elsif ($ua isa HTTP::Promise) {
-    require UserAgent::Any::Impl::HttpPromise;
-    return UserAgent::Any::Impl::HttpPromise->new(ua => $ua);
-  } elsif ($ua->DOES('UserAgent::Any')) {
-    return $ua;
-  } else {
-    croak 'Unknown User Agent type "'.ref($ua).'"';
-  }
-}
-
 sub _wrap_response {
   return undef unless @_;  ## no critic (ProhibitExplicitReturnUndef)
   return @_ if @_ == 1;
@@ -81,16 +60,46 @@ sub wrap_method {  ## no critic (RequireArgUnpacking)
 }
 
 # Do not define methods after this line, otherwise they are part of the role.
-use Moo::Role;
+use Moo;
 
-has ua => (
+# We expect a single argument to this class, so we take it without the need to
+# pass it in a hash. See:
+# https://metacpan.org/pod/Moo#BUILDARGS
+around BUILDARGS => sub {
+  my ($orig, $class, @args) = @_;
+
+  return {impl => $args[0]}
+      if @args == 1 && (ref($args[0]) ne 'HASH' || !blessed($args[0]));
+
+  return $class->$orig(@args);
+};
+
+has _impl => (
+  init_arg => 'impl',
   is => 'ro',
   required => 1,
+  handles => 'UserAgent::Any::Impl',
+  coerce => sub ($ua) {
+    croak 'Passed User Agent object must be a blessed reference' unless blessed($ua);
+    if ($ua isa LWP::UserAgent) {
+      require UserAgent::Any::Impl::LwpUserAgent;
+      return UserAgent::Any::Impl::LwpUserAgent->new(ua => $ua);
+    } elsif ($ua isa AnyEvent::UserAgent) {
+      require UserAgent::Any::Impl::AnyEventUserAgent;
+      return UserAgent::Any::Impl::AnyEventUserAgent->new(ua => $ua);
+    } elsif ($ua isa Mojo::UserAgent) {
+      require UserAgent::Any::Impl::MojoUserAgent;
+      return UserAgent::Any::Impl::MojoUserAgent->new(ua => $ua);
+    } elsif ($ua isa HTTP::Promise) {
+      require UserAgent::Any::Impl::HttpPromise;
+      return UserAgent::Any::Impl::HttpPromise->new(ua => $ua);
+    } elsif ($ua->DOES('UserAgent::Any')) {
+      return $ua;
+    } else {
+      croak 'Unknown User Agent type "'.ref($ua).'"';
+    }
+  }
 );
-
-my @methods = qw(get post delete head patch put);
-
-requires map { ($_, $_.'_cb', $_.'_p') } @methods;
 
 1;
 
@@ -176,9 +185,6 @@ Builds a new C<UserAgent::Any> object wrapping the given underlying user agent.
 The wrapped object must be an instance of a
 L<supported user agent|/Supported user agents>. Feel free to ask for or
 contribute new implementations.
-
-Note that C<UserAgent::Any> is a L<Moo::Role> and not a class. As such you can
-compose it or delegate to it, but you can’t extend it directly.
 
 =head2 Synchronous and asynchronous supports
 
@@ -356,10 +362,6 @@ by the call to C<&method>.
 Here is are two minimal example on how to create a client library for a
 hypothetical service exposing a C<create> call using the C<POST> method.
 
-Note in particular that, in the first example, to bring the C<post> method from
-C<UserAgent::Any> in C<MyPackage>, we are using L<Moo> delegation to the
-C<UserAgent::Any> package, which is an L<Moo::Role> with the user agent methods:
-
   package MyPackage;
 
   use 5.036;
@@ -369,12 +371,7 @@ C<UserAgent::Any> package, which is an L<Moo::Role> with the user agent methods:
 
   use namespace::clean;
 
-  has ua => (
-    is => 'ro',
-    handles => 'UserAgent::Any',
-    coerce => sub { UserAgent::Any->new($_[0]) },
-    required => 1,
-  );
+  extends 'UserAgent::Any';
 
   wrap_method(create_document => 'post', sub ($self, %opts) {
     return ('https://example.com/create/'.$opts{document_id}, $opts{content});

@@ -5,13 +5,12 @@ use 5.036;
 use Carp;
 use Exporter 'import';
 use List::Util 'pairs';
-use Moo;
 use Readonly;
 use UserAgent::Any::Response;
 
 use namespace::clean -except => ['import'];
 
-our @EXPORT_OK = qw(get_call_args generate_methods new_response);
+our @EXPORT_OK = qw(get_call_args generate_methods new_response params_to_hash);
 
 our $VERSION = 0.01;
 
@@ -60,5 +59,14 @@ sub params_to_hash (@params) {
   }
   return \%hash;
 }
+
+use Moo::Role;
+
+has ua => (
+  is => 'ro',
+  required => 1,
+);
+
+requires map { ($_, $_.'_cb', $_.'_p') } @METHODS;
 
 1;

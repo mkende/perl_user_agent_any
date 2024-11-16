@@ -9,7 +9,7 @@ use Scalar::Util 'blessed';
 
 use namespace::clean -except => ['import'];
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 our @EXPORT_OK = ('wrap_method');
 
 sub _wrap_response {

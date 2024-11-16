@@ -3,6 +3,7 @@ Revision history for Perl distribution UserAgent-Any
 0.04 - ??
 
  - Improvement to the source distribution on GitHub.
+ - Move the wrap_method function to a separate package.
 
 0.03 - 2024-11-16
 

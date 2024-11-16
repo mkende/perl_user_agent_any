@@ -2,7 +2,7 @@ use 5.036;
 
 use AnyEvent;
 use Encode 'encode';
-use Test2::V0 -target => 'UserAgent::Any';
+use Test2::V0;
 
 # We first test the wrap_method directly calling a class method.
 
@@ -11,7 +11,7 @@ package TestSubject {
   use AnyEvent;
   use Moo;
   use Promise::XS;
-  use UserAgent::Any 'wrap_method';
+  use UserAgent::Any::Wrapper 'wrap_method';
 
   sub foo ($self, $l, $r, $c = 1) {
     return ($l + $r) x $c;
@@ -97,7 +97,7 @@ is($test->countbar(1, 2, 2), [3, 3], 'count 2');
 
 package TestDerived {
   use Moo;
-  use UserAgent::Any 'wrap_method';
+  use UserAgent::Any::Wrapper 'wrap_method';
 
   has subject => (is => 'rw');
 

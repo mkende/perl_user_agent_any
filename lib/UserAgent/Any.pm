@@ -4,6 +4,7 @@ use 5.036;
 
 use Carp;
 use Exporter 'import';
+use Moo;
 use Scalar::Util 'blessed';
 
 use namespace::clean -except => ['import'];
@@ -59,23 +60,20 @@ sub wrap_method {  ## no critic (RequireArgUnpacking)
   return;
 }
 
-# Do not define methods after this line, otherwise they are part of the role.
-use Moo;
-
 # We expect a single argument to this class, so we take it without the need to
 # pass it in a hash. See:
 # https://metacpan.org/pod/Moo#BUILDARGS
 around BUILDARGS => sub {
   my ($orig, $class, @args) = @_;
 
-  return {impl => $args[0]}
+  return {ua => $args[0]}
       if @args == 1 && (ref($args[0]) ne 'HASH' || !blessed($args[0]));
 
   return $class->$orig(@args);
 };
 
 has _impl => (
-  init_arg => 'impl',
+  init_arg => 'ua',
   is => 'ro',
   required => 1,
   handles => 'UserAgent::Any::Impl',

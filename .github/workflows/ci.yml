@@ -58,11 +58,12 @@ jobs:
 
     - name: Install Modules
       if:  ${{ matrix.os != 'macos' }}
+      # install the dependencies in 3 steps to limit the risk of 
       run: |
         cpanm -V
-        cpanm -v --installdeps --notest --with-configure --with-all-features .
-        cpanm -v --installdeps --notest --with-recommends --with-all-features .
-        cpanm -v --installdeps --notest --with-suggests --with-all-features .
+        cpanm -v --installdeps --notest --with-configure --with-all-features --without-feature HttpPromise .
+        cpanm -v --installdeps --notest --with-recommends --with-all-features --without-feature HttpPromise .
+        cpanm -v --installdeps --notest --with-suggests --with-all-features --without-feature HttpPromise .
 
     # MacOS runners are very costly, so let’s install the minimum amount of
     # dependency.

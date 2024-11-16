@@ -1,5 +1,9 @@
 Revision history for Perl distribution UserAgent-Any
 
+0.04 - ??
+
+ - Improvement to the source distribution on GitHub.
+
 0.03 - 2024-11-16
 
  - Also simplify the Response object class hierarchy.

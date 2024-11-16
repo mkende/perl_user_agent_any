@@ -88,7 +88,7 @@ has ua => (
   required => 1,
 );
 
-my @methods = qw(get post delete);
+my @methods = qw(get post delete head patch put);
 
 requires map { ($_, $_.'_cb', $_.'_p') } @methods;
 

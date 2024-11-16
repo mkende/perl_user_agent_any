@@ -5,7 +5,7 @@ use 5.036;
 use HTTP::Promise;
 use Moo;
 use Promise::Me;
-use UserAgent::Any::Impl 'get_call_args', 'generate_methods', 'new_response', 'params_to_hash';
+use UserAgent::Any::Impl::Helper ':all';
 
 use namespace::clean;
 

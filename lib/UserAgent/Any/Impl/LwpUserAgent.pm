@@ -4,7 +4,7 @@ use 5.036;
 
 use Carp;
 use Moo;
-use UserAgent::Any::Impl 'get_call_args', 'generate_methods', 'new_response';
+use UserAgent::Any::Impl::Helper 'get_call_args', 'generate_methods', 'new_response';
 
 use namespace::clean;
 

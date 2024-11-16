@@ -3,7 +3,7 @@ package UserAgent::Any::Impl::MojoUserAgent;
 use 5.036;
 
 use Moo;
-use UserAgent::Any::Impl 'get_call_args', 'generate_methods', 'new_response', 'params_to_hash';
+use UserAgent::Any::Impl::Helper ':all';
 
 use namespace::clean;
 

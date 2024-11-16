@@ -13,9 +13,9 @@ extends 'UserAgent::Any::Impl';
 our $VERSION = 0.01;
 
 sub call {
-  my ($this, $method, $url, $params, $content) = &get_call_args;
+  my ($self, $method, $url, $params, $content) = &get_call_args;
   return new_response(
-    $this->{ua}->$method(
+    $self->{ua}->$method(
       $url,
       UserAgent::Any::Impl::params_to_hash(@{$params}),
       (defined ${$content} ? ${$content} : ())
@@ -23,9 +23,9 @@ sub call {
 }
 
 sub call_cb {
-  my ($this, $method, $url, $params, $content) = &get_call_args;
+  my ($self, $method, $url, $params, $content) = &get_call_args;
   return sub ($cb) {
-    $this->{ua}->$method(
+    $self->{ua}->$method(
       $url,
       UserAgent::Any::Impl::params_to_hash(@{$params}),
       (defined ${$content} ? ${$content} : ()),
@@ -35,8 +35,8 @@ sub call_cb {
 }
 
 sub call_p {
-  my ($this, $method, $url, $params, $content) = &get_call_args;
-  return $this->{ua}->${\"${method}_p"}(
+  my ($self, $method, $url, $params, $content) = &get_call_args;
+  return $self->{ua}->${\"${method}_p"}(
     $url,
     UserAgent::Any::Impl::params_to_hash(@{$params}),
     (defined ${$content} ? ${$content} : ())

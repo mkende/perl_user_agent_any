@@ -14,17 +14,17 @@ extends 'UserAgent::Any::Impl';
 our $VERSION = 0.01;
 
 sub call {
-  my ($this, $method, $url, $params, $content) = &get_call_args;
+  my ($self, $method, $url, $params, $content) = &get_call_args;
   my $r =
-      $this->{ua}->$method($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ()));
+      $self->{ua}->$method($url, @{$params}, (defined ${$content} ? (Content => ${$content}) : ()));
   return new_response($r);
 }
 
-sub call_cb ($this, $url, %params) {
+sub call_cb ($self, $url, %params) {
   croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
 }
 
-sub call_p ($this, $url, %params) {
+sub call_p ($self, $url, %params) {
   croak 'UserAgent::Any async methods are not implemented with LWP::UserAgent';
 }
 

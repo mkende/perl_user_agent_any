@@ -15,10 +15,10 @@ extends 'UserAgent::Any::Impl';
 our $VERSION = 0.01;
 
 sub call {
-  my ($this, $method, $url, $params, $content) = &get_call_args;
+  my ($self, $method, $url, $params, $content) = &get_call_args;
   my $cv = AnyEvent->condvar;
   my $r;
-  $this->{ua}->$method(
+  $self->{ua}->$method(
     $url,
     %{UserAgent::Any::Impl::params_to_hash(@{$params})},
     (defined ${$content} ? (Content => ${$content}) : ()),
@@ -28,9 +28,9 @@ sub call {
 }
 
 sub call_cb {
-  my ($this, $method, $url, $params, $content) = &get_call_args;
+  my ($self, $method, $url, $params, $content) = &get_call_args;
   return sub ($cb) {
-    $this->{ua}->$method(
+    $self->{ua}->$method(
       $url,
       %{UserAgent::Any::Impl::params_to_hash(@{$params})},
       (defined ${$content} ? (Content => ${$content}) : ()),
@@ -40,9 +40,9 @@ sub call_cb {
 }
 
 sub call_p {
-  my ($this, $method, $url, $params, $content) = &get_call_args;
+  my ($self, $method, $url, $params, $content) = &get_call_args;
   my $p = Promise::XS::deferred();
-  $this->{ua}->$method(
+  $self->{ua}->$method(
     $url,
     %{UserAgent::Any::Impl::params_to_hash(@{$params})},
     (defined ${$content} ? (Content => ${$content}) : ()),

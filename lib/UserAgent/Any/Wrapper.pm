@@ -2,10 +2,13 @@ package UserAgent::Any::Wrapper;
 
 use 5.036;
 
+use UserAgent::Any::Impl::Helper;
 use Exporter 'import';
 
 our $VERSION = 0.01;
-our @EXPORT_OK = ('wrap_method');
+our @EXPORT_OK = qw(wrap_method wrap_all_methods wrap_get_like_methods
+                    wrap_post_like_methods);
+our @CARP_NOT;
 
 sub _wrap_response {
   return undef unless @_;  ## no critic (ProhibitExplicitReturnUndef)
@@ -13,13 +16,22 @@ sub _wrap_response {
   return \@_;
 }
 
+sub _push_if_needed ($list, $val) {
+  # list can be an array reference or a symbolic reference.
+  no strict 'refs';  ## no critic (ProhibitNoStrict)
+  push @{$list}, $val unless grep { $_ eq $val } @{$list};
+  return;
+}
+
 sub wrap_method {  ## no critic (RequireArgUnpacking)
   my $name = shift;
-  my $member = shift if ref($_[0]) eq 'CODE';  ## no critic (ProhibitConditionalDeclarations)
-  my ($method, $code, $cb) = @_;
-  my $dest_pkg = caller(0);
+  my $getter = shift if ref($_[0]) eq 'CODE';  ## no critic (ProhibitConditionalDeclarations)
+  my ($method, $code, $cb, $level) = @_;  # level is undocumented
+  my $dest_pkg = caller($level // 0);
+  _push_if_needed("${dest_pkg}::CARP_NOT", 'UserAgent::Any::Wrapper');
+  _push_if_needed(\@CARP_NOT, $dest_pkg);
+  my $get_obj = defined $getter ? sub ($self) { $self->$getter() } : sub ($self) { $self };
   no strict 'refs';  ## no critic (ProhibitNoStrict)
-  my $get_obj = defined $member ? sub ($self) { $self->$member() } : sub ($self) { $self };
   if (defined $cb) {
     *{"${dest_pkg}::${name}"} = sub ($self, @args) {
       $cb->($self, _wrap_response($get_obj->($self)->$method($code->($self, @args))), @args);
@@ -46,6 +58,34 @@ sub wrap_method {  ## no critic (RequireArgUnpacking)
     *{"${dest_pkg}::${name}_p"} =
         sub ($self, @args) { $get_obj->($self)->$method_p($code->($self, @args)) };
   }
+  return;
+}
+
+sub _wrap_several_methods ($methods, $target, $code, $cb = undef) {
+  for my $m (@{$methods}) {
+    if (ref($target) eq 'CODE') {
+      # The last argument (2) is the number of frame to skip in wrap_method to
+      # find the actual caller.
+      wrap_method($m, $target, $m, $code, $cb, 2);
+    } else {
+      wrap_method($m, "${target}::${m}", $code, $cb, 2);
+    }
+  }
+  return;
+}
+
+sub wrap_all_methods ($target, $code, $cb = undef) {
+  _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS, $target, $code, $cb);
+  return;
+}
+
+sub wrap_get_like_methods ($target, $code, $cb = undef) {
+  _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITHOUT_DATA, $target, $code, $cb);
+  return;
+}
+
+sub wrap_post_like_methods ($target, $code, $cb = undef) {
+  _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITH_DATA, $target, $code, $cb);
   return;
 }
 
@@ -127,12 +167,39 @@ return the default result from the invoked method, without any transformation.
 
 =head3 Wrapping a method of a class member
 
-  wrap_method($name => \&method, $delegate, $cb1[, $cb2]);
+  wrap_method($name => \&getter, $delegate, $cb1[, $cb2]);
 
 Alternatively to the above, C<wrap_method> can be used to wrap a method of a
 class member. Instead of calling the method named C<$delegate> in your class,
 the call above will call the method named C<$delegate> on the reference returned
-by the call to C<&method>.
+by the call to C<&getter> (that must be a class method).
+
+=head3 Wrapping all the UserAgent::Any methods
+
+  wrap_all_methods(\&getter, $cb1[, $cb2]);
+
+This call will generates in your package all the methods exposed by
+L<UserAgent::Any> (get(), post(), etc. and their asynchronous variants) by
+wrapping the similarly named methods of the object returned by C<getter()>.
+
+The two callbacks C<$cb1> and C<$cb2> are used in the same way as described
+above for all the calls.
+
+Alternatively, you can use the following call:
+
+  wrap_all_methods($package, $cb1[, $cb2]);
+
+That one will also generate the same set of methods wrapping methods of the
+object itself coming from a base class given by C<$package> (so
+C<${package}::get>, C<${package}::post_cb>, etc.). The package will typically
+name a base class of your class.
+
+In addition, there are two other functions C<wrap_post_like_methods()> and
+C<wrap_get_like_methods()> with the same signature (also accepting a getter or
+a package name) which will generate a subset of all the user agent methods,
+respectively for the methods that not expecting a request body (like C<GET>) and
+for those that are expecting a request body (like C<POST>), in case you need to
+use different callbacks for these two scenarios.
 
 =head2 Example
 

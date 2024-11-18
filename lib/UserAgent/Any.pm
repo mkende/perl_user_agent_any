@@ -8,7 +8,7 @@ use Scalar::Util 'blessed';
 
 use namespace::clean;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 our @CARP_NOT = 'UserAgent::Any::Wrapper';
 
 # We expect a single argument to this class, so we take it without the need to

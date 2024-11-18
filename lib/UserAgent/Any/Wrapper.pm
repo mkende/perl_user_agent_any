@@ -7,7 +7,7 @@ use Exporter 'import';
 
 our $VERSION = 0.01;
 our @EXPORT_OK = qw(wrap_method wrap_all_methods wrap_get_like_methods
-                    wrap_post_like_methods);
+                    wrap_post_like_methods wrap_method_sets);
 our @CARP_NOT;
 
 sub _wrap_response {
@@ -74,19 +74,23 @@ sub _wrap_several_methods ($methods, $target, $code, $cb = undef) {
   return;
 }
 
+# This is not documented for now, although it would be easy to do so. We mostly
+# expose it to test _wrap_several_methods and still have 2 hops in the
+# call-stack.
+sub wrap_method_sets ($methods, $target, $code, $cb = undef) {
+  return _wrap_several_methods ($methods, $target, $code, $cb = undef);
+}
+
 sub wrap_all_methods ($target, $code, $cb = undef) {
-  _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS, $target, $code, $cb);
-  return;
+  return _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS, $target, $code, $cb);
 }
 
 sub wrap_get_like_methods ($target, $code, $cb = undef) {
-  _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITHOUT_DATA, $target, $code, $cb);
-  return;
+  return _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITHOUT_DATA, $target, $code, $cb);
 }
 
 sub wrap_post_like_methods ($target, $code, $cb = undef) {
-  _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITH_DATA, $target, $code, $cb);
-  return;
+  return _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITH_DATA, $target, $code, $cb);
 }
 
 1;

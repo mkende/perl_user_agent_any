@@ -97,18 +97,20 @@ is($test->countbar(1, 2, 2), [3, 3], 'count 2');
 
 package TestDerived {
   use Moo;
-  use UserAgent::Any::Wrapper 'wrap_method';
+  use UserAgent::Any::Wrapper 'wrap_method', 'wrap_method_sets';
 
   has subject => (is => 'rw');
 
   wrap_method(hop => \&subject => 'foo', sub ($self, $l, $r) { ($l, $r) });
   wrap_method(rehop => \&subject => 'foo', sub ($self, $l, $r) { ($l, $r) }, sub ($self, $res, @) { return $res + 1 });
+  wrap_method_sets(['foo'], \&subject, sub ($self, $l, $r) { ($l, $r + 2) });
 }
 
 my $derived = TestDerived->new(subject => $test);
 
 is($derived->hop(1, 2), 3, 'hop');
 is($derived->rehop(1, 2), 4, 'rehop');
+is($derived->foo(1, 2), 5, 'foohop');
 
 {
   my $r = 0;
@@ -129,6 +131,14 @@ is($derived->rehop(1, 2), 4, 'rehop');
 {
   my $r = 0;
   my $cv = AnyEvent->condvar;
+  $derived->foo_cb(1, 2)->(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 5, 'foohop_cb');
+}
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
   $derived->hop_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
   $cv->recv;
   is($r, 3, 'hop_p');
@@ -140,6 +150,14 @@ is($derived->rehop(1, 2), 4, 'rehop');
   $derived->rehop_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
   $cv->recv;
   is($r, 4, 'rehop_p');
+}
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
+  $derived->foo_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 5, 'foohop_p');
 }
 
 done_testing;

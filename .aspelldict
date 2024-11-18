@@ -1,4 +1,4 @@
-personal_ws-1.1 en 52 
+personal_ws-1.1 en 54 
 APIs
 AnyEvent
 AnyEventUserAgent
@@ -34,6 +34,7 @@ bool
 cb
 condvar
 dest
+getter
 isa
 metacpan
 namespace
@@ -44,6 +45,7 @@ proc
 req
 ro
 sublicense
+subname
 subtest
 todo
 tx

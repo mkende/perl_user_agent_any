@@ -4,10 +4,12 @@ use 5.036;
 
 use UserAgent::Any::Impl::Helper;
 use Exporter 'import';
+use List::Util 'none';
+use Sub::Util 'set_subname';
 
 our $VERSION = 0.01;
 our @EXPORT_OK = qw(wrap_method wrap_all_methods wrap_get_like_methods
-                    wrap_post_like_methods wrap_method_sets);
+    wrap_post_like_methods wrap_method_sets);
 our @CARP_NOT;
 
 sub _wrap_response {
@@ -19,7 +21,14 @@ sub _wrap_response {
 sub _push_if_needed ($list, $val) {
   # list can be an array reference or a symbolic reference.
   no strict 'refs';  ## no critic (ProhibitNoStrict)
-  push @{$list}, $val unless grep { $_ eq $val } @{$list};
+  push @{$list}, $val if none { $_ eq $val } @{$list};
+  return;
+}
+
+sub _create_method ($name, $code) {
+  no strict 'refs';  ## no critic (ProhibitNoStrict)
+  *{$name} = set_subname($name, $code);
+  #set_subname($name, *{$name});
   return;
 }
 
@@ -31,32 +40,37 @@ sub wrap_method {  ## no critic (RequireArgUnpacking)
   _push_if_needed("${dest_pkg}::CARP_NOT", 'UserAgent::Any::Wrapper');
   _push_if_needed(\@CARP_NOT, $dest_pkg);
   my $get_obj = defined $getter ? sub ($self) { $self->$getter() } : sub ($self) { $self };
-  no strict 'refs';  ## no critic (ProhibitNoStrict)
   if (defined $cb) {
-    *{"${dest_pkg}::${name}"} = sub ($self, @args) {
-      $cb->($self, _wrap_response($get_obj->($self)->$method($code->($self, @args))), @args);
-    };
+    _create_method(
+      "${dest_pkg}::${name}",
+      sub ($self, @args) {
+        $cb->($self, _wrap_response($get_obj->($self)->$method($code->($self, @args))), @args);
+      });
     my $method_cb = "${method}_cb";
-    *{"${dest_pkg}::${name}_cb"} = sub ($self, @args) {
-      return sub ($final_cb) {
-        $get_obj->($self)->$method_cb($code->($self, @args))
-            ->(sub { $final_cb->($cb->($self, &_wrap_response, @args)) });
-      }
-    };
+    _create_method(
+      "${dest_pkg}::${name}_cb",
+      sub ($self, @args) {
+        return sub ($final_cb) {
+          $get_obj->($self)->$method_cb($code->($self, @args))
+              ->(sub { $final_cb->($cb->($self, &_wrap_response, @args)) });
+        }
+      });
     my $method_p = "${method}_p";
-    *{"${dest_pkg}::${name}_p"} = sub ($self, @args) {
-      $get_obj->($self)->$method_p($code->($self, @args))
-          ->then(sub { $cb->($self, &_wrap_response, @args) });
-    };
+    _create_method(
+      "${dest_pkg}::${name}_p",
+      sub ($self, @args) {
+        $get_obj->($self)->$method_p($code->($self, @args))
+            ->then(sub { $cb->($self, &_wrap_response, @args) });
+      });
   } else {
-    *{"${dest_pkg}::${name}"} =
-        sub ($self, @args) { $get_obj->($self)->$method($code->($self, @args)) };
+    _create_method("${dest_pkg}::${name}",
+      sub ($self, @args) { $get_obj->($self)->$method($code->($self, @args)) });
     my $method_cb = "${method}_cb";
-    *{"${dest_pkg}::${name}_cb"} =
-        sub ($self, @args) { $get_obj->($self)->$method_cb($code->($self, @args)) };
+    _create_method("${dest_pkg}::${name}_cb",
+      sub ($self, @args) { $get_obj->($self)->$method_cb($code->($self, @args)) });
     my $method_p = "${method}_p";
-    *{"${dest_pkg}::${name}_p"} =
-        sub ($self, @args) { $get_obj->($self)->$method_p($code->($self, @args)) };
+    _create_method("${dest_pkg}::${name}_p",
+      sub ($self, @args) { $get_obj->($self)->$method_p($code->($self, @args)) });
   }
   return;
 }
@@ -78,7 +92,7 @@ sub _wrap_several_methods ($methods, $target, $code, $cb = undef) {
 # expose it to test _wrap_several_methods and still have 2 hops in the
 # call-stack.
 sub wrap_method_sets ($methods, $target, $code, $cb = undef) {
-  return _wrap_several_methods ($methods, $target, $code, $cb = undef);
+  return _wrap_several_methods($methods, $target, $code, $cb = undef);
 }
 
 sub wrap_all_methods ($target, $code, $cb = undef) {
@@ -86,11 +100,13 @@ sub wrap_all_methods ($target, $code, $cb = undef) {
 }
 
 sub wrap_get_like_methods ($target, $code, $cb = undef) {
-  return _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITHOUT_DATA, $target, $code, $cb);
+  return _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITHOUT_DATA,
+    $target, $code, $cb);
 }
 
 sub wrap_post_like_methods ($target, $code, $cb = undef) {
-  return _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITH_DATA, $target, $code, $cb);
+  return _wrap_several_methods(\@UserAgent::Any::Impl::Helper::METHODS_WITH_DATA, $target, $code,
+    $cb);
 }
 
 1;

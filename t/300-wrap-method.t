@@ -20,14 +20,14 @@ package TestSubject {
   sub foo_cb ($self, $l, $r, $c = 1) {
     return sub ($cb) {
       my $i;
-      $i = AnyEvent->idle(cb => sub { undef $i; $cb->($self->foo($l, $r, $c)) });
+      $i = AnyEvent->idle(cb => sub { undef $i; $cb->(foo($self, $l, $r, $c)) });
     };
   }
 
   sub foo_p ($self, $l, $r, $c = 1) {
     my $p = Promise::XS::deferred();
     my $i;
-    $i = AnyEvent->idle(cb => sub { undef $i; $p->resolve($self->foo($l, $r, $c)) });
+    $i = AnyEvent->idle(cb => sub { undef $i; $p->resolve(foo($self, $l, $r, $c)) });
     return $p->promise();
   }
 
@@ -158,6 +158,37 @@ is($derived->foo(1, 2), 5, 'foohop');
   $derived->foo_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
   $cv->recv;
   is($r, 5, 'foohop_p');
+}
+
+# Now we test the wrap_method calling a method of a member of the class.
+
+package TestDerived2 {
+  use Moo;
+  use UserAgent::Any::Wrapper 'wrap_method_sets';
+
+  extends 'TestSubject';
+
+  wrap_method_sets(['foo'], 'TestSubject', sub ($self, $l, $r) { ($l, $r + 3) });
+}
+
+my $derived2 = TestDerived2->new();
+
+is($derived2->foo(1, 2), 6, 'basehop');
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
+  $derived2->foo_cb(1, 2)->(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 6, 'basehop_cb');
+}
+
+{
+  my $r = 0;
+  my $cv = AnyEvent->condvar;
+  $derived2->foo_p(1, 2)->then(sub ($res) { $r = $res; $cv->send });
+  $cv->recv;
+  is($r, 6, 'basehop_p');
 }
 
 done_testing;

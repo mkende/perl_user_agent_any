@@ -13,6 +13,20 @@ has res => (
   required => 1,
 );
 
+# This is used to compensate for some response implementation that don’t decode
+# JSON content (as it’s not in the spec).
+has _forced_charset => (
+  is => 'ro',
+  lazy => 1,
+  default => sub ($self) {
+    if ($self->header('Content-Type') =~ m{^application/json\s*;.*\s*charset=([^ ;]+)}i) {
+      return $1;
+    } else {
+      return;
+    }
+  },
+);
+
 requires qw(status_code status_text success content raw_content headers header);
 
 1;

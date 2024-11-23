@@ -29,4 +29,16 @@ is($r->header('Baz'), 'bin', 'header1');
 is($r->header('Foo'), 'Bar, Bar2', 'header2scalar');
 is([$r->header('Foo')], ['Bar', 'Bar2'], 'header2list');
 
+{
+  my @raw_headers = ('Content-Type' => 'application/json; charset=utf-8');
+  my $utf8_content = 'Héllö!';
+  my $raw_content = encode('UTF-8', $utf8_content);
+  my $raw_response = HTTP::Promise::Response->new(200, 'success', \@raw_headers, $raw_content);
+  my $r = CLASS()->new($raw_response);
+
+  is($r->_forced_charset, 'utf-8', 'forced charset');
+  is($r->raw_content, $raw_content, 'raw_content');
+  is($r->content, $utf8_content, 'content');
+}
+
 done_testing;

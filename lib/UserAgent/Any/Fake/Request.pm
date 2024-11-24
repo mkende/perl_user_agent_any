@@ -9,19 +9,20 @@ use namespace::clean;
 
 our $VERSION = 0.01;
 
-has [qw(url method _headers content)] => (
-  is => 'ro',
-);
+has [qw(url method _headers content)] => (is => 'ro',);
 
 around BUILDARGS => sub {
   my ($orig, $class, $method, $url, @args) = @_;
 
   my $content;
   $content = pop @args if @args % 2;
-  
-  return {url => $url, method => $method, _headers => params_to_hash(@args), content => $content};
 
-  return $class->$orig(@args);
+  return {
+    url => $url,
+    method => $method,
+    _headers => params_to_hash(@args),
+    content => $content
+  };
 };
 
 sub header ($self, $k) {
@@ -29,7 +30,7 @@ sub header ($self, $k) {
   return unless defined $v;
   return $v unless ref($v);
   return @{$v} if wantarray;
-  return join(',', @{$v});  
+  return join(',', @{$v});
 }
 
 sub headers ($self) {
@@ -68,8 +69,6 @@ UserAgent::Any::Fake::Request
 =head1 DESCRIPTION
 
 See the synopsis for now.
-
-=back
 
 =head1 AUTHOR
 

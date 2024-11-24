@@ -16,16 +16,10 @@ our $VERSION = 0.01;
 extends 'UserAgent::Any';
 with 'UserAgent::Any::Impl';
 
-has '+_impl' => (
-  required => 0,
-);
-has '+ua' => (
-  required => 0,
-);
+has '+_impl' => (required => 0,);
+has '+ua' => (required => 0,);
 
-has _handler => (
-  is => 'ro',
-);
+has _handler => (is => 'ro',);
 
 around BUILDARGS => sub {
   my ($orig, $class, @args) = @_;
@@ -35,7 +29,6 @@ around BUILDARGS => sub {
 
   return $class->$orig(@args);
 };
-
 
 sub call ($self, @args) {
   my $req = UserAgent::Any::Fake::Request->new(@args);
@@ -53,7 +46,6 @@ sub call_p ($self, $url, %params) {
 }
 
 BEGIN { generate_methods() }
-
 
 1;
 

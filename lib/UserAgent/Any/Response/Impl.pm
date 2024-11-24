@@ -19,7 +19,8 @@ has _forced_charset => (
   is => 'ro',
   lazy => 1,
   default => sub ($self) {
-    if ($self->header('Content-Type') =~ m{^application/json\s*;.*\s*charset=([^ ;]+)}i) {
+    if ($self->header('Content-Type') =~ m{^ application/json \s* ; .* \s* charset=([^ ;]+) }xi)
+    {
       return $1;
     } else {
       return;

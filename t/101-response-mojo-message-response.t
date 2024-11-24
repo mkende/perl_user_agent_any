@@ -36,11 +36,12 @@ BEGIN {
 }
 
 {
-  my @raw_headers = ('Content-Type' => 'application/json; charset=utf-8');
   my $utf8_content = 'Héllö!';
   my $raw_content = encode('UTF-8', $utf8_content);
   my $raw_response = Mojo::Message::Response->new(code => 200, message => 'success');
   $raw_response->body($raw_content);
+  my $headers = $raw_response->headers;
+  $headers->add('Content-Type' => 'application/json; charset=utf-8');
   my $r = CLASS()->new($raw_response);
 
   is($r->_forced_charset, 'utf-8', 'forced charset');

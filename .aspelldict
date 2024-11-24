@@ -1,4 +1,4 @@
-personal_ws-1.1 en 54 
+personal_ws-1.1 en 62 
 APIs
 AnyEvent
 AnyEventUserAgent
@@ -9,6 +9,7 @@ HttpResponse
 IOLoop
 ISA
 Impl
+JSON
 Kende
 LWP
 LwpUserAgent
@@ -27,14 +28,18 @@ RPC
 RequireArgUnpacking
 UTF
 UserAgent
+abc
 arg
 args
 async
 bool
 cb
+charset
 condvar
 dest
+eq
 getter
+impl
 isa
 metacpan
 namespace
@@ -42,8 +47,10 @@ ne
 ok
 params
 proc
+qw
 req
 ro
+rw
 sublicense
 subname
 subtest
@@ -53,3 +60,4 @@ ua
 undef
 unicode
 url
+useragent

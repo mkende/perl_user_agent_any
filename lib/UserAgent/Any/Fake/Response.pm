@@ -12,17 +12,11 @@ our $VERSION = 0.01;
 extends 'UserAgent::Any::Response';
 with 'UserAgent::Any::Response::Impl';
 
-has '+_impl' => (
-  required => 0,
-);
+has '+_impl' => (required => 0,);
 
-has '+res' => (
-  required => 0,
-);
+has '+res' => (required => 0,);
 
-has [qw(status_code status_text content _headers)] => (
-  is => 'rw',
-);
+has [qw(status_code status_text content _headers)] => (is => 'rw',);
 
 sub raw_content ($self, $content = undef) {
   return $self->content($content) if defined $content;
@@ -38,7 +32,7 @@ sub header ($self, $k, $val = undef) {
   return unless defined $v;
   return $v unless ref($v);
   return @{$v} if wantarray;
-  return join(',', @{$v});  
+  return join(',', @{$v});
 }
 
 sub headers ($self, @headers) {

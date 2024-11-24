@@ -1,6 +1,6 @@
 Revision history for Perl distribution UserAgent-Any
 
-0.05 - ??
+0.05 - 2024-11-24
 
  - Decode UTF-8 encoded JSON content (or any other charset) which is not done
    by default in many user agents.

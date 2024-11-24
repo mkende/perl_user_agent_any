@@ -42,7 +42,7 @@ sub headers ($self, @headers) {
   }
 
   my @all_headers;
-  for my $k (keys %{$self->_headers}) {
+  for my $k (sort keys %{$self->_headers}) {
     push @all_headers, map { ($k, $_) } $self->header($k);
   }
   return @all_headers;
@@ -86,6 +86,12 @@ See the synopsis for now.
 There is no handling of the content encoding and content charset in this fake
 object. So you should always just fill the C<content> directly and not rely on
 C<raw_content>.
+
+=item *
+
+The headers returned by C<headers()> are sorted by names (and the order of their
+values is preserved from the input). This is to help write deterministic tests
+but this is B<not> the behavior of the real implementations.
 
 =back
 

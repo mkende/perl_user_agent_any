@@ -23,5 +23,6 @@ is($r->status_code, 300, 'status code');
 is($r->raw_content, 'the content', 'raw content');
 is([$r->header('Foo')], [qw(bar baz)], 'header array');
 is(scalar($r->header('blah')), 'abc,def', 'header scalar');
+is([$r->headers], [Bin => 'bang', Foo => 'bar', Foo => 'baz', blah => 'abc', blah => 'def'], 'headers order');
 
 done_testing;

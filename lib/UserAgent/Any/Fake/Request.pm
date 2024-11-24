@@ -35,7 +35,7 @@ sub header ($self, $k) {
 
 sub headers ($self) {
   my @all_headers;
-  for my $k (keys %{$self->_headers}) {
+  for my $k (sort keys %{$self->_headers}) {
     push @all_headers, map { ($k, $_) } $self->header($k);
   }
   return @all_headers;

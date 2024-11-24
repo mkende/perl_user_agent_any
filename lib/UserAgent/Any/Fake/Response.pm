@@ -3,6 +3,7 @@ package UserAgent::Any::Fake::Response;
 use 5.036;
 
 use Moo;
+use Readonly;
 use UserAgent::Any::Impl::Helper 'params_to_hash';
 
 use namespace::clean;
@@ -18,8 +19,11 @@ has '+res' => (required => 0,);
 
 has [qw(status_code status_text content _headers)] => (is => 'rw',);
 
+Readonly my $HTTP_STATUS_CODE_SUCCESS_MIN => 200;
+Readonly my $HTTP_STATUS_CODE_SUCCESS_MAX => 299;
+
 sub success ($self) {
-  return int($self->status_code / 100) == 2
+  return $HTTP_STATUS_CODE_SUCCESS_MIN <= $self->status_code <= $HTTP_STATUS_CODE_SUCCESS_MAX;
 }
 
 sub raw_content ($self, $content = undef) {

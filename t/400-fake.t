@@ -19,6 +19,7 @@ use Test2::V0 -target => 'UserAgent::Any::Fake';
   isa_ok($r, 'UserAgent::Any::Response');
 
   is($r->status_code, 300, 'status code');
+  is($r->success, F(), 'is not success');
   is($r->raw_content, 'the content', 'raw content');
   is([$r->header('Foo')], [qw(bar baz)], 'header array');
   is(scalar($r->header('blah')), 'abc,def', 'header scalar');
@@ -33,6 +34,7 @@ use Test2::V0 -target => 'UserAgent::Any::Fake';
   my $fake = CLASS()->new(\&test_headers_order);
   my $r = $fake->get('example.com', Bin => 'bang', Foo => 'bar', Foo => 'baz');
   is($r->status_code, 200, 'request header status code');
+  is($r->success, T(), 'is success');
 }
 
 

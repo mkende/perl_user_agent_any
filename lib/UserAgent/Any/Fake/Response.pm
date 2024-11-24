@@ -18,6 +18,10 @@ has '+res' => (required => 0,);
 
 has [qw(status_code status_text content _headers)] => (is => 'rw',);
 
+sub success ($self) {
+  return int($self->status_code / 100) == 2
+}
+
 sub raw_content ($self, $content = undef) {
   return $self->content($content) if defined $content;
   return $self->content;
